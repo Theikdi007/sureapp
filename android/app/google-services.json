@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "354014334141",
+    "firebase_url": "https://surebenefits-2fabd-default-rtdb.firebaseio.com",
+    "project_id": "surebenefits-2fabd",
+    "storage_bucket": "surebenefits-2fabd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:354014334141:android:dbe698107b66a59da1fbd4",
+        "android_client_info": {
+          "package_name": "com.example.surebenefits"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBrnsj0s-2ohuLw8r5L_0HSei0ZzOwKVK0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:354014334141:android:b2f7b96001f3f30da1fbd4",
+        "android_client_info": {
+          "package_name": "com.isuremyanmar.surebenefits"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBrnsj0s-2ohuLw8r5L_0HSei0ZzOwKVK0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
