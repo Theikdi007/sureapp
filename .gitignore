@@ -52,3 +52,6 @@ design-ref/prototype/sure-app-prototype.bundle.html
 
 # KH Teka / KH Interference (commercial, Kurppa Hosk): not licensed for redistribution
 design-ref/prototype/unpacked/*.otf
+
+# parity tool deps
+tool/parity/node_modules/
