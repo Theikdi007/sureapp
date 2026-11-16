@@ -176,13 +176,23 @@ class _HeartButton extends StatelessWidget {
                   ),
                   child: icon,
                 )
+              // Prototype dark: a see-through neon-faded (16 %) disc, no
+              // glass, so the photo shows through untouched. Glass sheen and
+              // blur over a light photo turned it into a pale blob.
+              : Theme.of(context).brightness == Brightness.dark
+              ? DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: c.primaryFaded,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(child: icon),
+                )
               // Prototype: `IconButton` faded primary (neon-faded disc,
               // primary-ink heart), here as neon-tinted Liquid Glass.
               : GlassSurface(
                   borderRadius: SureRadius.all(SureRadius.pill),
                   shadow: false,
                   interactive: true,
-                  // Scale the token's own opacity: solid in light, 16 % in dark.
                   tint: c.primaryFaded.withValues(
                     alpha: c.primaryFaded.a * 0.94,
                   ),

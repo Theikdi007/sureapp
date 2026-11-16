@@ -22,6 +22,9 @@ flutter drive --driver=test_driver/screenshot_driver.dart \
 cd tool/parity && npm install
 node proto.mjs "$PWD/../../design-ref/prototype/sure-app-prototype.bundle.html" /tmp/parity/proto
 
+# Dark mode: add --dart-define=PARITY_DARK=true to both flutter drive runs,
+#   and `dark` as a third argument to proto.mjs.
+
 # 3. Side-by-side images
 python3 compose.py /tmp/parity/proto /tmp/parity/app /tmp/parity/pairs
 ```

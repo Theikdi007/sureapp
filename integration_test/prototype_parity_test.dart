@@ -37,6 +37,10 @@ void main() {
     const storage = FlutterSecureStorage();
     await storage.deleteAll();
     await storage.write(key: 'app.onboarding_done', value: 'true');
+    // --dart-define=PARITY_DARK=true captures dark mode (Profile › Dark Mode).
+    if (const bool.fromEnvironment('PARITY_DARK')) {
+      await storage.write(key: 'app.theme_mode', value: 'dark');
+    }
     await storage.write(key: 'auth.access_token', value: 'mock-access');
     await storage.write(key: 'auth.refresh_token', value: 'mock-refresh');
     await storage.write(

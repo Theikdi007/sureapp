@@ -148,6 +148,9 @@ class SureColors extends ThemeExtension<SureColors> {
   // Literal colours in the prototype that its dark mode leaves alone, so
   // they look the same in both themes.
 
+  /// Ink on the white discs and pills over product photos (`rgb(20,22,27)`).
+  static const literalInk = Color(0xFF14161B);
+
   /// "About this product" panel (`rgb(243,245,249)`).
   static const literalPanel = Color(0xFFF3F5F9);
 

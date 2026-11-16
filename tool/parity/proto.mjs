@@ -5,7 +5,9 @@ fs.mkdirSync(out, {recursive: true});
 const b = await puppeteer.launch({executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless: true, args: ['--allow-file-access-from-files']});
 const p = await b.newPage();
 await p.setViewport({width: 402, height: 874, deviceScaleFactor: 2});
-await p.emulateMediaFeatures([{name: 'prefers-color-scheme', value: 'light'}]);
+// `node proto.mjs <html> <out> dark` captures the prototype's dark mode.
+const dark = mode === 'dark';
+await p.emulateMediaFeatures([{name: 'prefers-color-scheme', value: dark ? 'dark' : 'light'}]);
 await p.goto('file://' + html, {waitUntil: 'networkidle0', timeout: 120000});
 await p.waitForSelector('[data-screen-label]', {timeout: 120000});
 await new Promise(r => setTimeout(r, 2000));
@@ -16,6 +18,7 @@ await p.evaluate(() => {
   while (f && !(f.stateNode && f.stateNode.logic && typeof f.stateNode.logic.go === 'function')) f = f.return;
   window.__c = f.stateNode.logic;
 });
+await p.evaluate(d => { window.__dark = d; }, dark);
 if (mode === 'probe') {
   console.log(await p.evaluate(() => {
     const c = window.__c; const o = {};
@@ -29,7 +32,7 @@ for (const [name, st] of Object.entries(screens)) {
   await p.evaluate(st => new Promise(r => {
     const c = window.__c;
     const resolve = v => typeof v === 'string' && v.startsWith('$') ? eval(v.slice(1)) : v;
-    const s = {stack: [{screen: "tabs"}], cartOpen: false, ...Object.fromEntries(Object.entries(st).map(([k, v]) => [k, resolve(v)]))};
+    const s = {stack: [{screen: "tabs"}], cartOpen: false, dark: window.__dark, ...Object.fromEntries(Object.entries(st).map(([k, v]) => [k, resolve(v)]))};
     c.setState(s, r);
   }), st);
   await new Promise(r => setTimeout(r, 900));

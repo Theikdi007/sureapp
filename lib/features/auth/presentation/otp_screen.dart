@@ -234,8 +234,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 }
 
 /// Six 48×58 boxes, 10 apart, radius 14, 24/750 digits. Filled boxes are
-/// `neon-faded`; the next box has a 2 pt dark-green ring, the rest a 1 pt
-/// neutral border.
+/// `neon-faded`; the next box has a 2 pt dark-green ring, the rest the
+/// prototype's literal 12 % black ring (`boxBorder`, faint in dark mode).
 class _CodeBoxes extends StatelessWidget {
   const _CodeBoxes({required this.length, required this.code});
 
@@ -263,7 +263,7 @@ class _CodeBoxes extends StatelessWidget {
                     borderRadius: SureRadius.all(14),
                     border: i == code.length
                         ? Border.all(color: c.primaryInk, width: 2)
-                        : Border.all(color: c.border),
+                        : Border.all(color: c.boxBorder),
                   ),
                   child: FittedBox(
                     child: Text(

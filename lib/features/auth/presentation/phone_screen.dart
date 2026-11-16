@@ -160,7 +160,8 @@ String groupPhoneDigits(String digits) {
 }
 
 /// The prototype's number box: `+95` | digits, with a primary-ink caret.
-/// Radius 16, 1 pt `border-neutral`, 14/16 padding, 18 pt text.
+/// Radius 16, the prototype's literal 12 % black ring (`boxBorder`: near
+/// invisible in dark mode, as in the prototype), 14/16 padding, 18 pt text.
 class PhoneNumberBox extends StatelessWidget {
   const PhoneNumberBox({super.key, required this.digits, this.error = false});
 
@@ -181,7 +182,7 @@ class PhoneNumberBox extends StatelessWidget {
         decoration: BoxDecoration(
           color: c.raised,
           borderRadius: SureRadius.all(SureRadius.large),
-          border: Border.all(color: error ? c.critical : c.border),
+          border: Border.all(color: error ? c.critical : c.boxBorder),
         ),
         child: Row(
           children: [
@@ -191,7 +192,7 @@ class PhoneNumberBox extends StatelessWidget {
                   .copyWith(color: c.ink, height: 22 / 18),
             ),
             const SizedBox(width: 10),
-            Container(width: 1, height: 22, color: c.border),
+            Container(width: 1, height: 22, color: c.boxBorder),
             const SizedBox(width: 10),
             Expanded(
               child: Text(

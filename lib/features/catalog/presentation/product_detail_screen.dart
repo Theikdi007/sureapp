@@ -9,6 +9,7 @@ import '../../../core/network/interceptors.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/utils/myanmar_time.dart';
 import '../../../design_system/components/page_scaffold.dart';
+import '../../../design_system/components/photo_brightness.dart';
 import '../../../design_system/components/section_header.dart';
 import '../../../design_system/components/sure_button.dart';
 import '../../../design_system/components/sure_image.dart';
@@ -257,9 +258,20 @@ class _ProductViewState extends ConsumerState<_ProductView> {
     ];
 
     final top = MediaQuery.paddingOf(context).top;
+    // Over the photo the status bar follows the photo, not the theme: white
+    // on the dark product shots, dark on a light photo (or the API's light
+    // grey "no photo" picture), where white icons would vanish.
+    final shown = p.images.isEmpty
+        ? null
+        : p.images[_image.clamp(0, p.images.length - 1)];
+    final lightPhoto =
+        shown != null &&
+        (ref.watch(photoTopIsLightProvider(shown)).value ?? false);
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: AppTheme.statusBar(
-        _overPhoto ? Brightness.dark : Theme.of(context).brightness,
+        _overPhoto
+            ? (lightPhoto ? Brightness.light : Brightness.dark)
+            : Theme.of(context).brightness,
       ),
       child: Scaffold(
         backgroundColor: c.pageFaded,
@@ -410,8 +422,10 @@ class _GalleryState extends State<_Gallery> {
                     GlassSurface(
                       borderRadius: SureRadius.all(SureRadius.pill),
                       shadow: false,
-                      // Prototype: near-solid white for contrast on photos.
-                      tint: context.colors.raised.withValues(alpha: 0.92),
+                      // Prototype: near-solid white for contrast on photos,
+                      // in dark mode too (a literal colour there).
+                      tint: Colors.white.withValues(alpha: 0.92),
+                      solidColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
                         vertical: 5,
@@ -419,7 +433,7 @@ class _GalleryState extends State<_Gallery> {
                       child: Text(
                         '${widget.index + 1}/$n',
                         style: SureText.caption1(SureTypography.bold)
-                            .copyWith(color: context.colors.ink),
+                            .copyWith(color: SureColors.literalInk),
                       ),
                     ),
                   ],
@@ -608,7 +622,7 @@ class _TopButtons extends ConsumerWidget {
                     child: Icon(
                       icon,
                       size: 20,
-                      color: fg ?? const Color(0xFF14161B),
+                      color: fg ?? SureColors.literalInk,
                     ),
                   ),
                 ),

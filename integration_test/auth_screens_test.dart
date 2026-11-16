@@ -43,6 +43,13 @@ void main() {
   testWidgets('sign-in screens', (tester) async {
     // Start clean: no session, onboarding not seen.
     await const FlutterSecureStorage().deleteAll();
+    // --dart-define=PARITY_DARK=true captures dark mode.
+    if (const bool.fromEnvironment('PARITY_DARK')) {
+      await const FlutterSecureStorage().write(
+        key: 'app.theme_mode',
+        value: 'dark',
+      );
+    }
     final caps = await DeviceCaps.load();
     if (Platform.isAndroid) await binding.convertFlutterSurfaceToImage();
 
