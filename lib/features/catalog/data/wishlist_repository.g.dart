@@ -55,4 +55,4 @@ final class WishlistRepositoryProvider
 }
 
 String _$wishlistRepositoryHash() =>
-    r'f1a1c60d014ce8193b4d53c4dd3168b9361ca536';
+    r'9f59380cf6f619ced581615689c5698cc85ba126';

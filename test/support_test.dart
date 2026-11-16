@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sure_app/core/config/app_config.dart';
 import 'package:sure_app/core/core_providers.dart';
 import 'package:sure_app/core/network/api_exception.dart';
 import 'package:sure_app/core/network/interceptors.dart';
@@ -9,11 +8,12 @@ import 'package:sure_app/core/platform/device_caps.dart';
 import 'package:sure_app/design_system/theme/app_theme.dart';
 import 'package:sure_app/features/app_config/data/app_config_repository.dart';
 import 'package:sure_app/features/repairs/data/repairs_repository.dart';
-import 'package:sure_app/features/stores/data/stores_repository.dart';
 import 'package:sure_app/features/stores/presentation/find_store_screen.dart';
 import 'package:sure_app/features/support/presentation/support_screen.dart';
 import 'package:sure_app/features/warranty/data/warranty_repository.dart';
 import 'package:sure_app/features/warranty/presentation/warranty_screen.dart';
+
+import 'support/mock_overrides.dart';
 
 const _caps = DeviceCaps(
   platform: 'ios',
@@ -26,21 +26,10 @@ const _caps = DeviceCaps(
 
 Widget _app(Widget home, {Size size = const Size(400, 900)}) => ProviderScope(
   overrides: [
-    appConfigProvider.overrideWithValue(
-      const AppConfig(flavor: AppFlavor.mock, apiBaseUrl: ''),
-    ),
+    ...mockOverrides(),
     deviceCapsProvider.overrideWithValue(_caps),
     remoteAppConfigProvider.overrideWith(
       (ref) => MockAppConfigRepository().fetch(),
-    ),
-    repairsRepositoryProvider.overrideWithValue(
-      MockRepairsRepository(latency: Duration.zero),
-    ),
-    storesRepositoryProvider.overrideWithValue(
-      MockStoresRepository(latency: Duration.zero),
-    ),
-    warrantyRepositoryProvider.overrideWithValue(
-      MockWarrantyRepository(latency: Duration.zero),
     ),
   ],
   child: MediaQuery(

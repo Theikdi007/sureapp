@@ -94,7 +94,7 @@ final class LoyaltyRepositoryProvider
   }
 }
 
-String _$loyaltyRepositoryHash() => r'eb70f12e4bbdd461f2ba6467873983d5fc53f47d';
+String _$loyaltyRepositoryHash() => r'ea98d833cdc74ea47bdcee85d7aaaf9af1279fd3';
 
 /// Signed-in member's points and tier.
 

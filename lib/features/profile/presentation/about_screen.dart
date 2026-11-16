@@ -12,6 +12,7 @@ import '../../../design_system/theme/app_theme.dart';
 import '../../../design_system/tokens/sure_metrics.dart';
 import '../../../design_system/tokens/sure_typography.dart';
 import '../../content/data/content_repository.dart';
+import '../../stores/presentation/find_store_screen.dart';
 
 /// About & Legal (prototype `About & Legal`): brand card, then the text
 /// pages from `GET content/{slug}` and the app version.
@@ -51,14 +52,30 @@ class AboutScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: SureSpace.x2),
                     Text(
-                      'Official devices from the brands you trust, with '
-                      'TechVault warranty, in-home setup and Shopping Points '
-                      'rewards on every purchase.',
+                      'Official devices from the brands you trust, delivered '
+                      'across Yangon in as little as 3 hours — with TechVault '
+                      'warranty, in-home setup and SurePoints rewards on '
+                      'every purchase.',
                       style: SureText.caption1().copyWith(
                         color: c.inkFaded,
                         height: 1.6,
                       ),
                     ),
+                    // Prototype branch line, from `GET stores`.
+                    if (ref.watch(storeListProvider).value case final s?
+                        when s.isNotEmpty) ...[
+                      const SizedBox(height: SureSpace.x1),
+                      Text(
+                        s.take(3).map((x) => x.name).join(' · ').toUpperCase(),
+                        style: SureTypography.style(
+                          size: 11,
+                          // Design 750.
+                          weight: SureTypography.bold,
+                          letterSpacing: 11 * 0.06,
+                          color: c.primaryInk,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

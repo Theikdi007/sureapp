@@ -151,4 +151,4 @@ final class WarrantyRepositoryProvider
 }
 
 String _$warrantyRepositoryHash() =>
-    r'a33b7203c0787c16281c2ff9effe634bcd789193';
+    r'5eaeb0fa640e8447d0f1ebe28ba554e349ce6b45';

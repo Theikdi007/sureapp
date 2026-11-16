@@ -55,7 +55,7 @@ final class AppConfigRepositoryProvider
 }
 
 String _$appConfigRepositoryHash() =>
-    r'4f594a231abba313bd50cc2dd20f53417e55ed0b';
+    r'459f5d7cd395acb135dcb8edd7a8c0c4640682db';
 
 /// Loaded once at launch; the splash screen waits for it.
 

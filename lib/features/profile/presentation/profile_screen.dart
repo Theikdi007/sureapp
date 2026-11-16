@@ -341,7 +341,8 @@ class _SettingsList extends ConsumerWidget {
           onTap: push == null ? null : () => onPush(!push),
         ),
         ListRow(
-          icon: lock.method == LockMethod.face
+          // Prototype: the Face ID icon on iPhone.
+          icon: ios || lock.method == LockMethod.face
               ? LucideIcons.scanFace
               : LucideIcons.fingerprint,
           title: 'App Lock',
@@ -368,6 +369,17 @@ class _SettingsList extends ConsumerWidget {
                 .set(v ? ThemeMode.dark : ThemeMode.light),
           ),
           onTap: () => _chooseTheme(context, ref, theme),
+        ),
+        ListRow(
+          icon: LucideIcons.earth,
+          title: 'Language',
+          subtitle: 'English',
+          // Prototype: Burmese isn't ready yet, so the row only says so.
+          onTap: () => SureToast.show(
+            context,
+            'Myanmar language coming soon',
+            icon: LucideIcons.earth,
+          ),
         ),
         ListRow(
           icon: LucideIcons.fileText,

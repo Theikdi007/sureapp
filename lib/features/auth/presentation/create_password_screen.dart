@@ -120,6 +120,7 @@ class _CreatePasswordScreenState extends ConsumerState<CreatePasswordScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           PageHeader(
+            subtitleMaxLines: 2,
             title: reset ? 'Set a new password' : 'Create a password',
             subtitle: reset
                 ? 'Number verified — choose a new password'

@@ -480,10 +480,12 @@ class TrackOrderScreen extends ConsumerWidget {
           _column([
             InlineAlert(
               icon: LucideIcons.truck,
-              text: [
-                if (t.mapLabel.isNotEmpty) t.mapLabel,
-                if (t.etaText != null) t.etaText!,
-              ].join(' · ').ifEmpty(shortStatus(t.statusLabel)),
+              // Prototype: only the arrival estimate when there is one.
+              text: switch (t.etaText) {
+                final eta? when eta.startsWith('Estimated') => eta,
+                final eta? => 'Estimated arrival: $eta',
+                null => t.mapLabel.ifEmpty(shortStatus(t.statusLabel)),
+              },
             ),
             if (t.courierName != null)
               _CourierCard(name: t.courierName!, phone: t.courierPhone),

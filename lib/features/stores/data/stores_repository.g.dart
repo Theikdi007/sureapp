@@ -85,4 +85,4 @@ final class StoresRepositoryProvider
   }
 }
 
-String _$storesRepositoryHash() => r'19d5e43f14d08c2083696cf031dba3ea9d11e0f3';
+String _$storesRepositoryHash() => r'c5c26fd56eef4e5a8c1547c1a1826c39614fad6c';

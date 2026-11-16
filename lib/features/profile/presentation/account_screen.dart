@@ -591,7 +591,7 @@ class _PasswordSectionState extends ConsumerState<_PasswordSection> {
         SectionHeader(
           title: 'Security',
           size: SectionHeaderSize.small,
-          action: SureLink(_open ? 'Close' : 'Change password', onTap: _toggle),
+          action: SureLink(_open ? 'Close' : 'Set password', onTap: _toggle),
         ),
         AnimatedSize(
           duration: SureMotion.medium,
@@ -671,7 +671,7 @@ class _AddressSection extends ConsumerWidget {
   const _AddressSection();
 
   static IconData iconFor(String name) => switch (name) {
-    'map-pin-house' || 'house' || 'home' => LucideIcons.house,
+    'map-pin-house' || 'house' || 'home' => LucideIcons.mapPinHouse,
     'building' || 'building-2' || 'briefcase' => LucideIcons.building2,
     _ => LucideIcons.mapPin,
   };

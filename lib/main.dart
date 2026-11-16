@@ -6,6 +6,7 @@ import 'app.dart';
 import 'core/config/app_config.dart';
 import 'core/core_providers.dart';
 import 'core/platform/device_caps.dart';
+import 'design_system/glass/glass_lens.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,6 +15,7 @@ Future<void> main() async {
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   final config = AppConfig.fromEnvironment();
   final caps = await DeviceCaps.load();
+  if (caps.supportsLiquidGlass) await GlassLens.preload();
 
   runApp(
     ProviderScope(

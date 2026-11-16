@@ -61,7 +61,10 @@ class AuthScaffold extends StatelessWidget {
       );
     }
 
+    // Prototype: 24 pt from the bottom edge, home indicator included, so
+    // the inset and the padding don't add up.
     final column = SafeArea(
+      minimum: const EdgeInsets.only(bottom: 24),
       child: CustomScrollView(
         slivers: [
           SliverFillRemaining(
@@ -72,6 +75,7 @@ class AuthScaffold extends StatelessWidget {
                 children: [content, const Spacer(), ?bottom],
               ),
               top: topPadding,
+              bottom: 0,
             ),
           ),
         ],

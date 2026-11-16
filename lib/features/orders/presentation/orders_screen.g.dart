@@ -189,3 +189,80 @@ abstract class _$RequestedOrdersTab extends $Notifier<String?> {
     return element.handleCreate(ref, build);
   }
 }
+
+@ProviderFor(homeSetupBooking)
+final homeSetupBookingProvider = HomeSetupBookingFamily._();
+
+final class HomeSetupBookingProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<HomeSetupBookingDto>,
+          HomeSetupBookingDto,
+          FutureOr<HomeSetupBookingDto>
+        >
+    with
+        $FutureModifier<HomeSetupBookingDto>,
+        $FutureProvider<HomeSetupBookingDto> {
+  HomeSetupBookingProvider._({
+    required HomeSetupBookingFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'homeSetupBookingProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$homeSetupBookingHash();
+
+  @override
+  String toString() {
+    return r'homeSetupBookingProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<HomeSetupBookingDto> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<HomeSetupBookingDto> create(Ref ref) {
+    final argument = this.argument as String;
+    return homeSetupBooking(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is HomeSetupBookingProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$homeSetupBookingHash() => r'dd11ed009b1944c0d8b3d656af040e019dafb945';
+
+final class HomeSetupBookingFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<HomeSetupBookingDto>, String> {
+  HomeSetupBookingFamily._()
+    : super(
+        retry: null,
+        name: r'homeSetupBookingProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  HomeSetupBookingProvider call(String number) =>
+      HomeSetupBookingProvider._(argument: number, from: this);
+
+  @override
+  String toString() => r'homeSetupBookingProvider';
+}

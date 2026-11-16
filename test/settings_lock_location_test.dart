@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sure_app/core/config/app_config.dart';
 import 'package:sure_app/core/core_providers.dart';
 import 'package:sure_app/core/platform/device_caps.dart';
 import 'package:sure_app/core/settings/theme_setting.dart';
@@ -12,7 +11,8 @@ import 'package:sure_app/features/auth/presentation/app_lock_screen.dart';
 import 'package:sure_app/features/auth/presentation/auth_providers.dart';
 import 'package:sure_app/features/cart/presentation/location_sheet.dart';
 import 'package:sure_app/features/home/data/home_dtos.dart';
-import 'package:sure_app/features/profile/data/profile_repository.dart';
+
+import 'support/mock_overrides.dart';
 
 /// Stands in for the biometric prompt.
 class FakeDeviceAuth implements DeviceAuth {
@@ -49,9 +49,7 @@ const _caps = DeviceCaps(
 ProviderContainer _container(FakeDeviceAuth auth) {
   final c = ProviderContainer(
     overrides: [
-      appConfigProvider.overrideWithValue(
-        const AppConfig(flavor: AppFlavor.mock, apiBaseUrl: ''),
-      ),
+      ...mockOverrides(),
       deviceCapsProvider.overrideWithValue(_caps),
       deviceAuthProvider.overrideWithValue(auth),
       sessionProvider.overrideWith(_SignedInSession.new),
@@ -115,9 +113,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          appConfigProvider.overrideWithValue(
-            const AppConfig(flavor: AppFlavor.mock, apiBaseUrl: ''),
-          ),
+          ...mockOverrides(),
           deviceCapsProvider.overrideWithValue(_caps),
           deviceAuthProvider.overrideWithValue(auth),
           sessionProvider.overrideWith(_SignedInSession.new),
@@ -161,13 +157,8 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          appConfigProvider.overrideWithValue(
-            const AppConfig(flavor: AppFlavor.mock, apiBaseUrl: ''),
-          ),
+          ...mockOverrides(),
           deviceCapsProvider.overrideWithValue(_caps),
-          profileRepositoryProvider.overrideWithValue(
-            MockProfileRepository(latency: Duration.zero),
-          ),
         ],
         child: MaterialApp(
           theme: AppTheme.light(),

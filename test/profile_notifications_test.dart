@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sure_app/core/config/app_config.dart';
 import 'package:sure_app/core/core_providers.dart';
 import 'package:sure_app/core/network/api_exception.dart';
 import 'package:sure_app/core/network/interceptors.dart';
 import 'package:sure_app/core/platform/device_caps.dart';
 import 'package:sure_app/design_system/components/sheet_components.dart';
 import 'package:sure_app/design_system/theme/app_theme.dart';
-import 'package:sure_app/features/notifications/data/notifications_repository.dart';
 import 'package:sure_app/features/notifications/presentation/notifications_screen.dart';
 import 'package:sure_app/features/profile/data/profile_repository.dart';
 import 'package:sure_app/features/profile/presentation/payment_methods_screen.dart';
+
+import 'support/mock_overrides.dart';
 
 const _caps = DeviceCaps(
   platform: 'ios',
@@ -32,16 +32,8 @@ Widget _app({required Widget home, List<RouteBase> routes = const []}) {
   );
   return ProviderScope(
     overrides: [
-      appConfigProvider.overrideWithValue(
-        const AppConfig(flavor: AppFlavor.mock, apiBaseUrl: ''),
-      ),
+      ...mockOverrides(),
       deviceCapsProvider.overrideWithValue(_caps),
-      profileRepositoryProvider.overrideWithValue(
-        MockProfileRepository(latency: Duration.zero),
-      ),
-      notificationsRepositoryProvider.overrideWithValue(
-        MockNotificationsRepository(latency: Duration.zero),
-      ),
     ],
     child: MaterialApp.router(theme: AppTheme.light(), routerConfig: router),
   );
@@ -168,7 +160,7 @@ void main() {
     );
     await tester.tap(find.text('Your order is on its way'));
     await tester.pumpAndSettle();
-    expect(find.text('View order'), findsOneWidget);
+    expect(find.text('Track this order'), findsOneWidget);
 
     await tester.tap(find.bySemanticsLabel('Back'));
     await tester.pumpAndSettle();

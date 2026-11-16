@@ -138,12 +138,10 @@ class _SureButtonState extends State<SureButton> {
       child: Material(
         color: bg,
         shape: StadiumBorder(
+          // DS Button: a coloured outline (critical too, e.g. Log out) uses
+          // `border-primary`; only the label turns red.
           side: outline
-              ? BorderSide(
-                  color: widget.critical && widget.onPressed != null
-                      ? c.critical.withValues(alpha: 0.4)
-                      : c.border,
-                )
+              ? BorderSide(color: widget.critical ? c.borderPrimary : c.border)
               : BorderSide.none,
         ),
         clipBehavior: Clip.antiAlias,

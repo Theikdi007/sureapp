@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/core_providers.dart';
+import '../../../core/push/push_registration.dart';
 import '../../../core/storage/token_storage.dart';
 import '../data/auth_dtos.dart';
 import '../data/auth_repository.dart';
@@ -68,6 +69,8 @@ class Session extends _$Session {
     final storage = ref.read(tokenStorageProvider);
     final tokens = await storage.read();
     if (tokens != null) {
+      // While still signed in: `DELETE devices/{token}` needs the session.
+      await ref.read(pushTokensProvider).unregister();
       try {
         await ref
             .read(authRepositoryProvider)

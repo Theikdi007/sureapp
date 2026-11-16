@@ -8,7 +8,8 @@ import 'package:sure_app/core/platform/device_caps.dart';
 import 'package:sure_app/design_system/theme/app_theme.dart';
 import 'package:sure_app/features/loyalty/data/loyalty_repository.dart';
 import 'package:sure_app/features/loyalty/presentation/top_up_screen.dart';
-import 'package:sure_app/features/rewards/data/rewards_repository.dart';
+
+import 'support/mock_overrides.dart';
 
 void main() {
   test('transfer moves points once per key', () async {

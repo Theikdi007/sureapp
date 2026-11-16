@@ -9,6 +9,10 @@ import '../../../core/router/routes.dart';
 import '../../../design_system/components/order_components.dart';
 import '../../../design_system/components/page_scaffold.dart';
 import '../../../design_system/components/section_header.dart';
+import '../../../design_system/components/service_components.dart';
+import '../../../design_system/components/sheet_components.dart';
+import '../../../design_system/components/sure_button.dart';
+import '../../../design_system/components/sure_toast.dart';
 import '../../../design_system/components/sure_image.dart';
 import '../../../design_system/theme/app_theme.dart';
 import '../../../design_system/tokens/sure_metrics.dart';
@@ -442,13 +446,132 @@ class BookingRow extends StatelessWidget {
         ],
       ),
     );
-    return b.orderNumber == null
-        ? row
-        : PressScale(
-            scale: 0.98,
-            semanticLabel: '${b.device}, ${b.statusLabel}',
-            onTap: () => context.push(AppRoutes.order(b.orderNumber!)),
-            child: row,
-          );
+    return PressScale(
+      scale: 0.98,
+      semanticLabel: '${b.device}, ${b.statusLabel}',
+      onTap: () => showBookingSheet(context, b),
+      child: row,
+    );
+  }
+}
+
+@riverpod
+Future<HomeSetupBookingDto> homeSetupBooking(Ref ref, String number) =>
+    ref.watch(ordersRepositoryProvider).booking(number);
+
+/// One visit (`GET home-setup/bookings/{number}`) in the shared sheet, laid
+/// out like the repair ticket sheet: status badge, detail card, then
+/// "View order" and, while allowed, "Cancel visit"
+/// (`POST home-setup/bookings/{number}/cancel`).
+Future<void> showBookingSheet(BuildContext context, HomeSetupBookingDto b) =>
+    showSureSheet<void>(
+      context,
+      title: b.device,
+      builder: (_) => _BookingSheet(initial: b),
+    );
+
+class _BookingSheet extends ConsumerStatefulWidget {
+  const _BookingSheet({required this.initial});
+
+  final HomeSetupBookingDto initial;
+
+  @override
+  ConsumerState<_BookingSheet> createState() => _BookingSheetState();
+}
+
+class _BookingSheetState extends ConsumerState<_BookingSheet> {
+  bool _cancelling = false;
+
+  Future<void> _cancel(HomeSetupBookingDto b) async {
+    setState(() => _cancelling = true);
+    try {
+      await ref.read(ordersRepositoryProvider).cancelBooking(b.number);
+      ref
+        ..invalidate(homeSetupBookingProvider(b.number))
+        ..invalidate(homeSetupBookingsProvider);
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      SureToast.show(
+        context,
+        'Home visit cancelled',
+        icon: LucideIcons.house,
+        color: SureToastColor.neutral,
+      );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() => _cancelling = false);
+      SureToast.show(
+        context,
+        e.userMessage,
+        icon: LucideIcons.circleAlert,
+        color: SureToastColor.critical,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    // Show the row's copy at once; the fresh answer replaces it.
+    final b =
+        ref.watch(homeSetupBookingProvider(widget.initial.number)).value ??
+        widget.initial;
+    final done = b.status != 'Scheduled';
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: StatusBadge(
+              label: b.statusLabel,
+              color: done ? 'neutral' : 'primary',
+            ),
+          ),
+          const SizedBox(height: SureSpace.x3),
+          OutlinedCard(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              children: [
+                DetailRow(label: 'Visit', value: b.number),
+                DetailRow(label: 'When', value: b.slotLabel),
+                if (b.addressText != null)
+                  DetailRow(label: 'Address', value: b.addressText!),
+                if (b.orderNumber != null)
+                  DetailRow(label: 'Order', value: '#${b.orderNumber}'),
+              ],
+            ),
+          ),
+          if (b.orderNumber != null) ...[
+            const SizedBox(height: SureSpace.x3),
+            SureButton(
+              label: 'View order',
+              variant: SureButtonVariant.outline,
+              onPressed: () {
+                Navigator.of(context).pop();
+                context.push(AppRoutes.order(b.orderNumber!));
+              },
+            ),
+          ],
+          if (b.canCancel) ...[
+            const SizedBox(height: SureSpace.x2),
+            SureButton(
+              label: 'Cancel visit',
+              variant: SureButtonVariant.ghost,
+              critical: true,
+              loading: _cancelling,
+              onPressed: () => _cancel(b),
+            ),
+          ] else if (!done) ...[
+            const SizedBox(height: SureSpace.x3),
+            Text(
+              'Visits can be cancelled up to 12 hours before the window.',
+              textAlign: TextAlign.center,
+              style: SureText.caption1().copyWith(color: c.inkFaded),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 }

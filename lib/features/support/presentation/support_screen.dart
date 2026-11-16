@@ -14,6 +14,8 @@ import '../../../design_system/components/sure_toast.dart';
 import '../../../design_system/theme/app_theme.dart';
 import '../../../design_system/tokens/sure_metrics.dart';
 import '../../../design_system/tokens/sure_typography.dart';
+import '../../orders/presentation/orders_screen.dart';
+import '../../stores/presentation/find_store_screen.dart';
 import '../../app_config/data/app_config_repository.dart';
 import '../../content/data/content_repository.dart';
 import '../../repairs/data/repairs_repository.dart';
@@ -52,7 +54,7 @@ class SupportScreen extends ConsumerWidget {
       ServiceCard(
         icon: LucideIcons.wrench,
         title: 'Repair Service',
-        description: 'Bring your device to a SureStore service desk',
+        description: 'Book a repair at your nearest store',
         onTap: () => context.push(AppRoutes.findStore),
       ),
       ServiceCard(
@@ -64,7 +66,12 @@ class SupportScreen extends ConsumerWidget {
       ServiceCard(
         icon: LucideIcons.mapPin,
         title: 'Find a Store',
-        description: 'Branches, opening hours and directions',
+        // Prototype: the branch names ("Hleden · Kamayut · Junction City").
+        description: switch (ref.watch(storeListProvider).value) {
+          final s? when s.isNotEmpty =>
+            s.take(3).map((x) => x.name).join(' · '),
+          _ => 'Branches, opening hours and directions',
+        },
         onTap: () => context.push(AppRoutes.findStore),
       ),
     ];
@@ -108,6 +115,23 @@ class SupportScreen extends ConsumerWidget {
               const SizedBox(height: 14),
               _RepairTracker(repairs: repairs),
               const SizedBox(height: SureSpace.x5),
+              // Prototype: shown only while a visit is scheduled.
+              if (ref
+                      .watch(homeSetupBookingsProvider)
+                      .value
+                      ?.where((b) => b.status == 'Scheduled')
+                  case final upcoming? when upcoming.isNotEmpty) ...[
+                const SectionHeader(
+                  title: 'Home Setup Visits',
+                  description: 'Scheduled technician visits',
+                ),
+                const SizedBox(height: 14),
+                for (final b in upcoming) ...[
+                  BookingRow(booking: b),
+                  const SizedBox(height: 12),
+                ],
+                const SizedBox(height: SureSpace.x5 - 12),
+              ],
               ServiceMenuList(
                 items: [
                   ServiceMenuItem(

@@ -4,9 +4,9 @@ import '../theme/app_theme.dart';
 import '../tokens/sure_metrics.dart';
 import '../tokens/sure_typography.dart';
 
-/// Design system `TextField` (forms/TextField.jsx), `outline` / `large`:
-/// 48 high, radius 12, 1 px `border-neutral` (critical on error), 14 pt
-/// side padding, 18 pt start icon in `ink-faded` 8 pt from the text, 16 pt
+/// Design system `TextField` (forms/TextField.jsx), `outline` / `medium`:
+/// 40 high, radius 12, 1 px `border-neutral` (critical on error), 12 pt
+/// side padding, 18 pt start icon in `ink-faded` 8 pt from the text, 14 pt
 /// text.
 class SureTextField extends StatelessWidget {
   const SureTextField({
@@ -75,23 +75,24 @@ class SureTextField extends StatelessWidget {
           onChanged: onChanged,
           onSubmitted: onSubmitted,
           cursorColor: c.primaryInk,
-          style: SureText.body2().copyWith(color: c.ink),
+          // DS `TextField` medium: 40 tall, 14 pt text, 12 pt sides.
+          style: SureText.body3().copyWith(color: c.ink),
           decoration: InputDecoration(
             isDense: true,
             filled: true,
             fillColor: c.raised,
             hintText: placeholder,
-            hintStyle: SureText.body2().copyWith(color: c.inkFaded),
-            constraints: const BoxConstraints(minHeight: 48),
+            hintStyle: SureText.body3().copyWith(color: c.inkFaded),
+            constraints: const BoxConstraints(minHeight: 40),
             contentPadding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 14,
+              horizontal: 12,
+              vertical: 10,
             ),
             prefixIcon: startIcon == null
                 ? null
                 : Padding(
                     padding: const EdgeInsetsDirectional.only(
-                      start: 14,
+                      start: 12,
                       end: SureSpace.x2,
                     ),
                     child: Icon(startIcon, size: 18, color: c.inkFaded),

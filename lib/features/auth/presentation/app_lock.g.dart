@@ -91,7 +91,7 @@ final class AppLockProvider extends $NotifierProvider<AppLock, AppLockState> {
   }
 }
 
-String _$appLockHash() => r'98d28131206d93b610855e78f0421c3cac9849a5';
+String _$appLockHash() => r'ea1bbef4d50f5af856542419d3962139181da279';
 
 /// App Lock (prototype "App Lock"): Face ID / fingerprint before the app
 /// shows, at launch and after [relockAfter] in the background. Per device;

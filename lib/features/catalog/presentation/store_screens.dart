@@ -13,6 +13,7 @@ import '../../../design_system/components/page_scaffold.dart';
 import '../../../design_system/components/section_header.dart';
 import '../../../design_system/components/sheet_components.dart';
 import '../../../design_system/components/sure_image.dart';
+import '../../../design_system/components/sure_toast.dart';
 import '../../../design_system/theme/app_theme.dart';
 import '../../../design_system/tokens/sure_metrics.dart';
 import '../../../design_system/tokens/sure_typography.dart';
@@ -486,6 +487,8 @@ class _StoreCard extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(width: 8),
+              _FollowPill(vendor: v),
             ],
           ),
           const SizedBox(height: 14),
@@ -534,6 +537,99 @@ class _StoreCard extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Follow / Following pill (`PUT|DELETE vendors/{id}/follow`). Same pill
+/// as the card's Store Rating button: neon-faded "Follow", solid neon
+/// "Following" (like the coupon Copy / Copied pill). Flips at once and
+/// rolls back if the call fails.
+class _FollowPill extends ConsumerStatefulWidget {
+  const _FollowPill({required this.vendor});
+
+  final VendorDto vendor;
+
+  @override
+  ConsumerState<_FollowPill> createState() => _FollowPillState();
+}
+
+class _FollowPillState extends ConsumerState<_FollowPill> {
+  bool? _pending;
+  bool _busy = false;
+
+  Future<void> _toggle() async {
+    if (_busy) return;
+    final next = !(_pending ?? widget.vendor.following);
+    setState(() {
+      _pending = next;
+      _busy = true;
+    });
+    final repo = ref.read(catalogRepositoryProvider);
+    try {
+      next
+          ? await repo.follow(widget.vendor.id)
+          : await repo.unfollow(widget.vendor.id);
+      ref.invalidate(vendorDetailProvider(widget.vendor.id));
+      ref.invalidate(allVendorsProvider);
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() => _pending = !next);
+      SureToast.show(
+        context,
+        e.userMessage,
+        icon: LucideIcons.circleAlert,
+        color: SureToastColor.critical,
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  void didUpdateWidget(_FollowPill old) {
+    super.didUpdateWidget(old);
+    // The refreshed store is the truth once it arrives.
+    if (!_busy && old.vendor != widget.vendor) _pending = null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final on = _pending ?? widget.vendor.following;
+    return PressScale(
+      scale: 0.95,
+      semanticLabel: on
+          ? 'Following ${widget.vendor.name}'
+          : 'Follow ${widget.vendor.name}',
+      onTap: _toggle,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        decoration: BoxDecoration(
+          color: on ? c.primary : c.primaryFaded,
+          borderRadius: SureRadius.all(SureRadius.pill),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              on ? LucideIcons.check : LucideIcons.plus,
+              size: 14,
+              color: on ? c.onPrimary : c.primaryInk,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              on ? 'Following' : 'Follow',
+              style: SureTypography.style(
+                size: 13,
+                weight: SureTypography.bold,
+                color: on ? c.onPrimary : c.primaryInk,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

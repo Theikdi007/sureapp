@@ -67,26 +67,28 @@ class GlassNavBar extends StatelessWidget {
           ),
           if (onSearch != null) ...[
             const SizedBox(width: SureSpace.x2),
-            Opacity(
-              opacity: 0.9,
-              child: GlassSurface(
-                borderRadius: SureRadius.all(SureRadius.pill),
-                child: Material(
-                  type: MaterialType.transparency,
-                  child: InkWell(
-                    customBorder: const CircleBorder(),
-                    onTap: onSearch,
-                    child: SizedBox.square(
-                      dimension: height,
-                      child: Semantics(
-                        button: true,
-                        label: 'Search',
-                        excludeSemantics: true,
-                        child: Icon(
-                          LucideIcons.search,
-                          size: 24,
-                          color: c.navInk,
-                        ),
+            // Prototype: the search bubble is a touch lighter (opacity 0.9).
+            // Done with the tint: an Opacity layer would cut the glass off
+            // from the content it blurs.
+            GlassSurface(
+              tint: c.glassTint.withValues(alpha: c.glassTint.a * 0.9),
+              interactive: true,
+              borderRadius: SureRadius.all(SureRadius.pill),
+              child: Material(
+                type: MaterialType.transparency,
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: onSearch,
+                  child: SizedBox.square(
+                    dimension: height,
+                    child: Semantics(
+                      button: true,
+                      label: 'Search',
+                      excludeSemantics: true,
+                      child: Icon(
+                        LucideIcons.search,
+                        size: 24,
+                        color: c.navInk,
                       ),
                     ),
                   ),

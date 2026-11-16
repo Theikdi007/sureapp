@@ -12,10 +12,11 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:sure_app/app.dart';
-import 'package:sure_app/core/config/app_config.dart';
 import 'package:sure_app/core/core_providers.dart';
 import 'package:sure_app/core/platform/device_caps.dart';
 import 'package:sure_app/core/router/app_router.dart';
+
+import '../test/support/mock_overrides.dart';
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -49,9 +50,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          appConfigProvider.overrideWithValue(
-            const AppConfig(flavor: AppFlavor.mock, apiBaseUrl: ''),
-          ),
+          ...mockOverrides(),
           deviceCapsProvider.overrideWithValue(caps),
         ],
         child: const SureApp(),

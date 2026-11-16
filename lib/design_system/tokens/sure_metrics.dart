@@ -66,4 +66,8 @@ abstract final class SureSize {
   static const double railExtendedWidth = 240;
   static const double listPaneWidth = 360;
   static const double maxContentWidth = 840;
+
+  /// Home › Flash Deals card, as the prototype renders it (about 2.8 cards
+  /// on a 402 pt phone).
+  static const double flashDealCard = 123;
 }

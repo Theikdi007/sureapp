@@ -1,6 +1,8 @@
-import '../../../shared/models/money.dart';
-import '../../catalog/data/catalog_dtos.dart';
-import 'home_dtos.dart';
+// Test-only stand-in moved out of the app build; data from the API doc's
+// JSON examples and the prototype.
+import 'package:sure_app/features/catalog/data/catalog_dtos.dart';
+import 'package:sure_app/features/home/data/home_dtos.dart';
+import 'package:sure_app/shared/models/money.dart';
 
 /// Mock-flavor catalog: the prototype's products, brands and stores in the
 /// API's shapes. Images come from the test server's public media; brand
@@ -121,7 +123,7 @@ abstract final class MockCatalog {
   static BrandDto _brand(String id, String name, String file) => BrandDto(
     id: id,
     name: name,
-    logoUrl: 'asset:assets/images/mock/brands/$file',
+    logoUrl: null, // mocks ship no logo assets
     initial: name.substring(0, 1),
     color: '#14161B',
     backgroundColor: '#F5F5F7',
