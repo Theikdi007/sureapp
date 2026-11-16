@@ -754,7 +754,10 @@ class _FlashDeals extends StatelessWidget {
           gap: 14,
           children: [
             for (final p in deals.items)
-              SizedBox(width: 150, child: ProductCardTile(product: p)),
+              SizedBox(
+                width: SureSize.flashDealCard,
+                child: ProductCardTile(product: p),
+              ),
           ],
         ),
       ],

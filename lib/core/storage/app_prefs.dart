@@ -31,4 +31,13 @@ class AppPrefs {
   Future<void> setAppLockEnabled(bool on) => on
       ? _storage.write(key: _appLockKey, value: 'true')
       : _storage.delete(key: _appLockKey);
+
+  static const _pushTokenKey = 'app.push_token';
+
+  /// The FCM token last sent with `POST devices`, so sign-out can remove it.
+  Future<String?> pushToken() => _storage.read(key: _pushTokenKey);
+
+  Future<void> setPushToken(String? token) => token == null
+      ? _storage.delete(key: _pushTokenKey)
+      : _storage.write(key: _pushTokenKey, value: token);
 }

@@ -11,6 +11,7 @@ import '../../../design_system/theme/app_theme.dart';
 import '../../../design_system/tokens/sure_metrics.dart';
 import '../../../design_system/tokens/sure_typography.dart';
 import '../../rewards/presentation/reward_widgets.dart';
+import '../../profile/presentation/profile_providers.dart';
 import '../data/loyalty_dtos.dart';
 import '../data/loyalty_repository.dart';
 import 'loyalty_widgets.dart';
@@ -86,7 +87,11 @@ class TierBenefitsScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '${fmtPoints(s.points)} Shopping Points',
+                  // Prototype: "Member since 2024" (`GET me` memberSinceYear).
+                  switch (ref.watch(profileProvider).value?.memberSinceYear) {
+                    final y? => 'Member since $y',
+                    null => '${fmtPoints(s.points)} Shopping Points',
+                  },
                   textAlign: TextAlign.center,
                   style: SureTypography.style(size: 13, color: c.inkFaded),
                 ),
@@ -101,28 +106,6 @@ class TierBenefitsScreen extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 20),
-                ],
-                if (t.earnRules.isNotEmpty) ...[
-                  const SectionHeader(
-                    title: 'How you earn',
-                    size: SectionHeaderSize.small,
-                  ),
-                  const SizedBox(height: 12),
-                  _ListCard(
-                    children: [
-                      for (final r in t.earnRules)
-                        _Row(
-                          leading: Icon(
-                            LucideIcons.coins,
-                            size: 20,
-                            color: c.ink,
-                          ),
-                          title: r.condition,
-                          subtitle:
-                              '${pointsLabel(r.rewardPoints)} · ${fmtPoints(r.clubScore)} Club Score',
-                        ),
-                    ],
-                  ),
                 ],
               ],
             ),
@@ -280,11 +263,12 @@ class _BenefitRow extends StatelessWidget {
 
   static IconData iconFor(String title) {
     final t = title.toLowerCase();
+    // "Scan & Earn" first: it also contains "earn".
+    if (t.contains('scan')) return LucideIcons.scanQrCode;
     if (t.contains('earn')) return LucideIcons.coins;
     if (t.contains('limit') || t.contains('daily') || t.contains('usage')) {
       return LucideIcons.walletCards;
     }
-    if (t.contains('scan')) return LucideIcons.scanQrCode;
     if (t.contains('partner') || t.contains('coupon')) {
       return LucideIcons.ticket;
     }

@@ -54,4 +54,4 @@ final class RewardsRepositoryProvider
   }
 }
 
-String _$rewardsRepositoryHash() => r'972c933dc6df361671b9e8509a82952f2d8149c9';
+String _$rewardsRepositoryHash() => r'a94efd1ee911a47a24b6c5f361cd9a12502a8555';

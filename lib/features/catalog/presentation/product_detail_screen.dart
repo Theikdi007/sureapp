@@ -410,6 +410,8 @@ class _GalleryState extends State<_Gallery> {
                     GlassSurface(
                       borderRadius: SureRadius.all(SureRadius.pill),
                       shadow: false,
+                      // Prototype: near-solid white for contrast on photos.
+                      tint: context.colors.raised.withValues(alpha: 0.92),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
                         vertical: 5,
@@ -580,7 +582,8 @@ class _TopButtons extends ConsumerWidget {
           excludeSemantics: true,
           child: PressScale(
             onTap: onTap,
-            scale: 0.94,
+            // The glass itself swells under the finger (iOS 26).
+            scale: 1,
             child: SizedBox.square(
               dimension: 40,
               child: DecoratedBox(
@@ -598,6 +601,7 @@ class _TopButtons extends ConsumerWidget {
                 child: GlassSurface(
                   borderRadius: SureRadius.all(SureRadius.pill),
                   shadow: false,
+                  interactive: true,
                   tint: Colors.white.withValues(alpha: 0.9),
                   solidColor: Colors.white,
                   child: Center(

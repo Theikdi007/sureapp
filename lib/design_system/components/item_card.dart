@@ -163,7 +163,9 @@ class _HeartButton extends StatelessWidget {
       excludeSemantics: true,
       child: PressScale(
         onTap: onTap,
-        scale: 0.92,
+        // Not yet wished it's glass, which swells under the finger instead
+        // (iOS 26); the solid wished disc keeps the prototype's press.
+        scale: wished ? 0.92 : 1,
         child: SizedBox.square(
           dimension: 36,
           child: wished
@@ -179,6 +181,7 @@ class _HeartButton extends StatelessWidget {
               : GlassSurface(
                   borderRadius: SureRadius.all(SureRadius.pill),
                   shadow: false,
+                  interactive: true,
                   // Scale the token's own opacity: solid in light, 16 % in dark.
                   tint: c.primaryFaded.withValues(
                     alpha: c.primaryFaded.a * 0.94,

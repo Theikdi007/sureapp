@@ -49,6 +49,9 @@ abstract final class SureTypography {
   static TextStyle _s(double size, double line, FontWeight w) =>
       style(size: size, weight: w, height: line / size);
 
+  /// IBM Plex Sans' `line-height: normal`.
+  static const double normalLineHeight = 1.3;
+
   static TextTheme textTheme(Color ink) => TextTheme(
     displayLarge: _s(56, 60, _extraBold), // title-4
     displayMedium: _s(48, 52, _extraBold), // title-5
@@ -60,7 +63,12 @@ abstract final class SureTypography {
     titleMedium: _s(18, 28, _medium), // body-1 medium
     titleSmall: _s(16, 24, _medium), // body-2 medium
     bodyLarge: _s(16, 24, _regular), // body-2
-    bodyMedium: _s(14, 20, _regular), // body-3
+    // Material's default text style for every `Text` without its own
+    // height. The prototype leaves line-height at `normal` there: IBM Plex
+    // Sans' own 1.3 (ascender 1025 + descender 275). It must be explicit:
+    // ThemeData merges this over Material 3's 1.43, so null keeps 1.43
+    // (rows came out ~2 pt taller per line).
+    bodyMedium: style(size: 14, height: normalLineHeight), // body-3
     bodySmall: _s(12, 16, _regular), // caption-1
     labelLarge: _s(14, 20, _medium), // body-3 medium
     labelMedium: _s(12, 16, _medium), // caption-1 medium

@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sure_app/app.dart';
-import 'package:sure_app/core/config/app_config.dart';
 import 'package:sure_app/core/core_providers.dart';
 import 'package:sure_app/core/platform/device_caps.dart';
 import 'package:sure_app/design_system/components/glass_nav_bar.dart';
-import 'package:sure_app/features/auth/data/auth_repository.dart';
+
+import 'support/mock_overrides.dart';
 
 const _caps = DeviceCaps(
   platform: 'ios',
@@ -25,13 +25,8 @@ Future<void> pumpApp(WidgetTester tester) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        appConfigProvider.overrideWithValue(
-          const AppConfig(flavor: AppFlavor.mock, apiBaseUrl: ''),
-        ),
+        ...mockOverrides(),
         deviceCapsProvider.overrideWithValue(_caps),
-        authRepositoryProvider.overrideWithValue(
-          MockAuthRepository(latency: Duration.zero),
-        ),
       ],
       child: const SureApp(),
     ),
@@ -85,10 +80,10 @@ void main() {
     await tester.tap(find.bySemanticsLabel('Profile').last);
     await tester.pumpAndSettle();
     expect(find.text('Thiri Aung'), findsOneWidget);
-    await tester.dragUntilVisible(
+    await tester.scrollUntilVisible(
       find.text('Log out'),
-      find.text('Settings'),
-      const Offset(0, -300),
+      300,
+      scrollable: find.byType(Scrollable).first,
     );
     await tester.pumpAndSettle();
     await tapButton(tester, 'Log out');

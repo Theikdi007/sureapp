@@ -15,12 +15,17 @@ class PageHeader extends StatelessWidget {
     this.subtitle,
     this.onBack,
     this.actions = const [],
+    this.subtitleMaxLines = 1,
   });
 
   final String title;
   final String? subtitle;
   final VoidCallback? onBack;
   final List<Widget> actions;
+
+  /// 1 in the fixed-height scaffold header; sign-in screens let a long
+  /// subtitle wrap to 2 like the prototype.
+  final int subtitleMaxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +75,7 @@ class PageHeader extends StatelessWidget {
                 if (subtitle != null)
                   Text(
                     subtitle!,
-                    maxLines: 1,
+                    maxLines: subtitleMaxLines,
                     overflow: TextOverflow.ellipsis,
                     textAlign: centered ? TextAlign.center : TextAlign.start,
                     style: SureText.caption1().copyWith(color: c.inkFaded),

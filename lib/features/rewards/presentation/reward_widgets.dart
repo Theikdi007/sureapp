@@ -97,7 +97,7 @@ class RewardLook {
           accent: c.primaryInk,
           top: 'ENGRAVING',
           main: '',
-          icon: LucideIcons.penTool,
+          icon: rewardIcon(r.title, LucideIcons.penTool),
         );
       default:
         return RewardLook(
@@ -105,7 +105,7 @@ class RewardLook {
           accent: c.ink,
           top: 'SURESTORE',
           main: '',
-          icon: LucideIcons.package,
+          icon: rewardIcon(r.title, LucideIcons.package),
         );
     }
   }
@@ -163,6 +163,28 @@ class RewardBadges extends StatelessWidget {
       ],
     );
   }
+}
+
+/// The prototype gives each special-sale / engraving item its own icon
+/// (smartphone, laptop, battery-charging…). The API sends no icon, so it is
+/// picked from the title, with the kind's icon as the fallback.
+IconData rewardIcon(String title, IconData fallback) {
+  final t = title.toLowerCase();
+  bool any(List<String> words) => words.any(t.contains);
+  if (any(['power bank', 'powerbank', 'battery', 'charger'])) {
+    return LucideIcons.batteryCharging;
+  }
+  if (any(['laptop', 'macbook', 'sleeve'])) return LucideIcons.laptop;
+  if (any(['airpods', 'earbuds', 'headphone', 'earphone'])) {
+    return LucideIcons.headphones;
+  }
+  if (any(['watch'])) return LucideIcons.watch;
+  if (any(['tablet', 'ipad'])) return LucideIcons.tablet;
+  if (any(['case', 'screen protector', 'protector'])) return LucideIcons.shield;
+  if (any(['phone', 'mobile', 'iphone', 'strap', 'ring'])) {
+    return LucideIcons.smartphone;
+  }
+  return fallback;
 }
 
 /// The tinted hero of a card: image, or icon / partner / benefit lines.

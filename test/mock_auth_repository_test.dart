@@ -1,7 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sure_app/core/network/api_exception.dart';
 import 'package:sure_app/features/auth/data/auth_dtos.dart';
-import 'package:sure_app/features/auth/data/auth_repository.dart';
+
+import 'support/mock_overrides.dart';
 
 Matcher throwsApi(String code) =>
     throwsA(isA<ApiException>().having((e) => e.code, 'code', code));

@@ -293,7 +293,13 @@ class ShoppingPointsCard extends StatelessWidget {
                             fmtPoints(s.points),
                             style: SureText.featured2().copyWith(color: c.ink),
                           ),
-                          Text('pts', style: cap),
+                          Text(
+                            'pts',
+                            style: cap.copyWith(
+                              fontWeight: SureTypography.bold,
+                              color: c.ink,
+                            ),
+                          ),
                         ],
                       ),
                     ],

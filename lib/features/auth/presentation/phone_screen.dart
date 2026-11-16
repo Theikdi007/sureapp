@@ -133,13 +133,10 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
           const SizedBox(height: SureSpace.x6),
         ],
       ),
-      bottom: Padding(
-        padding: const EdgeInsets.only(bottom: SureSpace.x4),
-        child: NumberKeypad(
-          enabled: !_loading,
-          onDigit: _type,
-          onDelete: _delete,
-        ),
+      bottom: NumberKeypad(
+        enabled: !_loading,
+        onDigit: _type,
+        onDelete: _delete,
       ),
     );
   }

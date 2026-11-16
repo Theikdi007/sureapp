@@ -344,9 +344,14 @@ class PillTabs extends StatelessWidget {
     }
 
     if (!fullWidth) {
-      return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(spacing: 6, children: [for (final it in items) tab(it)]),
+      // Prototype: start-aligned with the content edge, even when a parent
+      // (a pinned header) centres its child.
+      return Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(spacing: 6, children: [for (final it in items) tab(it)]),
+        ),
       );
     }
     return Row(

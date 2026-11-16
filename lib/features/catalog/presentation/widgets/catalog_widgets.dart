@@ -72,7 +72,7 @@ void openLink(BuildContext context, LinkDto link) {
 
 /// Button label for a [LinkDto], e.g. on a notification.
 String linkActionLabel(LinkDto link) => switch (link.type) {
-  'order' => 'View order',
+  'order' => 'Track this order',
   'reward' => 'View reward',
   'warranty_claim' => 'View warranty claim',
   'home_setup' => 'View home setup visit',

@@ -127,7 +127,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               left: 0,
               right: 0,
               bottom: 0,
-              child: SafeArea(top: false, child: panel),
+              // Prototype: 44 pt from the bottom edge, home indicator
+              // included.
+              child: SafeArea(
+                top: false,
+                minimum: const EdgeInsets.only(bottom: 44),
+                child: panel,
+              ),
             ),
           ],
         ),
@@ -207,7 +213,7 @@ class _TextPanel extends StatelessWidget {
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 480),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(28, 0, 28, 44),
+        padding: const EdgeInsets.fromLTRB(28, 0, 28, 0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

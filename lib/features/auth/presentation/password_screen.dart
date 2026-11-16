@@ -92,6 +92,7 @@ class _PasswordScreenState extends ConsumerState<PasswordScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           PageHeader(
+            subtitleMaxLines: 2,
             title: 'Welcome back',
             subtitle: 'for ${flow.phoneDisplay ?? ''}',
             onBack: () => context.go(AppRoutes.login),

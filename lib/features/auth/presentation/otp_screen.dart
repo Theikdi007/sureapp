@@ -151,6 +151,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           PageHeader(
+            subtitleMaxLines: 2,
             title: 'Verify your number',
             subtitle: 'Code sent to ${flow.phoneDisplay ?? ''}',
             onBack: () => context.go(AppRoutes.login),

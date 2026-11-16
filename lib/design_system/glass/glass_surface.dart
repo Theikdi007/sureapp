@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../theme/app_theme.dart';
 import '../tokens/sure_colors.dart';
 import '../tokens/sure_metrics.dart';
+import 'glass_lens.dart';
 import 'glass_tier.dart';
 
 /// Forces every [GlassSurface] below it to one tier (previews, QA, tests).
@@ -38,6 +39,7 @@ class GlassSurface extends ConsumerWidget {
     this.tier,
     this.tint,
     this.solidColor,
+    this.interactive = false,
   });
 
   final Widget child;
@@ -56,8 +58,18 @@ class GlassSurface extends ConsumerWidget {
   /// the opaque tint or `raised`.
   final Color? solidColor;
 
+  /// iOS 26 glass controls answer a touch: the glass swells a little and
+  /// lights up under the finger, then springs back. For tappable glass
+  /// (floating buttons); the tap itself stays with the child.
+  final bool interactive;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final surface = _surface(context, ref);
+    return interactive ? _GlassPress(child: surface) : surface;
+  }
+
+  Widget _surface(BuildContext context, WidgetRef ref) {
     final c = context.colors;
     var t =
         tier ??
@@ -98,28 +110,36 @@ class GlassSurface extends ConsumerWidget {
         ? base
         : base.withValues(alpha: (base.a + 0.15).clamp(0, 1));
 
-    content = BackdropFilter(
-      filter: liquid ? _liquidFilter : _frostedFilter,
-      child: DecoratedBox(
-        decoration: BoxDecoration(color: tint, borderRadius: borderRadius),
-        position: DecorationPosition.background,
-        child: liquid
-            // Behind the content: the sheen must not wash out the colors of
-            // buttons and text sitting on the glass.
-            ? CustomPaint(
-                painter: _SpecularRimPainter(radius: borderRadius, colors: c),
-                child: content,
-              )
-            : DecoratedBox(
-                position: DecorationPosition.foreground,
-                decoration: BoxDecoration(
-                  borderRadius: borderRadius,
-                  border: Border.all(color: c.borderFaded),
-                ),
-                child: content,
+    final surface = DecoratedBox(
+      decoration: BoxDecoration(color: tint, borderRadius: borderRadius),
+      position: DecorationPosition.background,
+      child: liquid
+          // Behind the content: the sheen must not wash out the colors of
+          // buttons and text sitting on the glass.
+          ? CustomPaint(
+              painter: _SpecularRimPainter(radius: borderRadius, colors: c),
+              child: content,
+            )
+          : DecoratedBox(
+              position: DecorationPosition.foreground,
+              decoration: BoxDecoration(
+                borderRadius: borderRadius,
+                border: Border.all(color: c.borderFaded),
               ),
-      ),
+              child: content,
+            ),
     );
+    content = liquid && GlassLens.available
+        // iOS 26: blur + saturation, then the edge lens.
+        ? GlassLensBackdrop(
+            inner: _liquidFilter,
+            radius: borderRadius.topLeft.x,
+            child: surface,
+          )
+        : BackdropFilter(
+            filter: liquid ? _liquidFilter : _frostedFilter,
+            child: surface,
+          );
 
     return DecoratedBox(
       decoration: BoxDecoration(borderRadius: borderRadius, boxShadow: shadows),
@@ -151,6 +171,102 @@ class GlassSurface extends ConsumerWidget {
     -0.1701, -0.5722, 1.7422, 0, 0, //
     0, 0, 0, 1, 0,
   ];
+}
+
+class _GlassPress extends StatefulWidget {
+  const _GlassPress({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_GlassPress> createState() => _GlassPressState();
+}
+
+class _GlassPressState extends State<_GlassPress>
+    with SingleTickerProviderStateMixin {
+  late final _press = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 140),
+    reverseDuration: const Duration(milliseconds: 420),
+  );
+  Offset? _at;
+
+  @override
+  void dispose() {
+    _press.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    return Listener(
+      onPointerDown: (e) {
+        setState(() => _at = e.localPosition);
+        _press.forward();
+      },
+      onPointerMove: (e) => setState(() => _at = e.localPosition),
+      onPointerUp: (_) => _press.reverse(),
+      onPointerCancel: (_) => _press.reverse(),
+      child: AnimatedBuilder(
+        animation: _press,
+        builder: (context, child) {
+          // Springy on release, like the system controls.
+          final v = _press.status == AnimationStatus.reverse
+              ? Curves.easeOutBack.transform(_press.value)
+              : Curves.easeOut.transform(_press.value);
+          return Transform.scale(
+            scale: reduceMotion ? 1 : 1 + 0.06 * v,
+            child: CustomPaint(
+              foregroundPainter: _PressGlowPainter(
+                at: _at,
+                strength: _press.value,
+              ),
+              child: child,
+            ),
+          );
+        },
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+/// The light under the finger.
+class _PressGlowPainter extends CustomPainter {
+  _PressGlowPainter({required this.at, required this.strength});
+
+  final Offset? at;
+  final double strength;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (strength == 0) return;
+    final center = at ?? size.center(Offset.zero);
+    final rect = Offset.zero & size;
+    canvas.save();
+    canvas.clipRRect(
+      RRect.fromRectAndRadius(rect, Radius.circular(size.shortestSide / 2)),
+    );
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..shader =
+            RadialGradient(
+              colors: [
+                Colors.white.withValues(alpha: 0.35 * strength),
+                Colors.white.withValues(alpha: 0),
+              ],
+            ).createShader(
+              Rect.fromCircle(center: center, radius: size.longestSide * 0.75),
+            ),
+    );
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(_PressGlowPainter old) =>
+      old.at != at || old.strength != strength;
 }
 
 /// Light catching the top-left edge and a soft sheen across the top, the

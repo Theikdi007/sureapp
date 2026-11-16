@@ -461,9 +461,13 @@ class _PhotoField extends StatelessWidget {
     }
     return PressScale(
       onTap: enabled ? onPick : null,
-      semanticLabel: 'Add a photo',
+      semanticLabel: 'Add a photo (JPEG, PNG or WebP, up to 5 MB)',
       child: CustomPaint(
-        painter: _DashedBorder(color: c.boxBorder, radius: SureRadius.large),
+        // Over the fill, or the fill hides it.
+        foregroundPainter: _DashedBorder(
+          color: c.boxBorder,
+          radius: SureRadius.large,
+        ),
         child: Container(
           padding: const EdgeInsets.all(26),
           decoration: BoxDecoration(
@@ -475,16 +479,12 @@ class _PhotoField extends StatelessWidget {
               Icon(LucideIcons.camera, size: 22, color: c.inkFaded),
               const SizedBox(height: SureSpace.x2),
               Text(
-                'Add a photo',
+                'Place here',
                 style: SureTypography.style(
                   size: 13,
                   height: 18 / 13,
                   color: c.inkFaded,
                 ),
-              ),
-              Text(
-                'JPEG, PNG or WebP, up to 5 MB',
-                style: SureText.caption1().copyWith(color: c.inkFaded),
               ),
             ],
           ),

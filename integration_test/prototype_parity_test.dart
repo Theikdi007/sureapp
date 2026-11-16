@@ -17,7 +17,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:sure_app/app.dart';
-import 'package:sure_app/core/config/app_config.dart';
 import 'package:sure_app/core/core_providers.dart';
 import 'package:sure_app/core/network/interceptors.dart';
 import 'package:sure_app/core/platform/device_caps.dart';
@@ -26,6 +25,10 @@ import 'package:sure_app/features/catalog/data/catalog_repository.dart';
 import 'package:sure_app/features/catalog/data/wishlist_repository.dart';
 import 'package:sure_app/features/catalog/presentation/shop_state.dart';
 import 'package:sure_app/features/notifications/data/notifications_repository.dart';
+
+import 'package:sure_app/design_system/glass/glass_lens.dart';
+
+import '../test/support/mock_overrides.dart';
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -48,14 +51,14 @@ void main() {
       }),
     );
     final caps = await DeviceCaps.load();
+    // As in main(): the iOS 26 lens shader.
+    if (caps.supportsLiquidGlass) await GlassLens.preload();
     if (Platform.isAndroid) await binding.convertFlutterSurfaceToImage();
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          appConfigProvider.overrideWithValue(
-            const AppConfig(flavor: AppFlavor.mock, apiBaseUrl: ''),
-          ),
+          ...mockOverrides(),
           deviceCapsProvider.overrideWithValue(caps),
         ],
         child: const SureApp(),
@@ -91,8 +94,11 @@ void main() {
       final scrollables = find.byType(Scrollable);
       if (scrollables.evaluate().isEmpty) return;
       for (var i = 1; i <= 2; i++) {
-        await tester.drag(scrollables.first, const Offset(0, -640),
-            warnIfMissed: false);
+        await tester.drag(
+          scrollables.first,
+          const Offset(0, -640),
+          warnIfMissed: false,
+        );
         await settle();
         await binding.takeScreenshot('${name}_$i');
       }

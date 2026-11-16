@@ -500,9 +500,10 @@ class MapBox extends StatelessWidget {
               Center(
                 child: Transform.translate(
                   offset: const Offset(0, -10),
+                  // Prototype: a solid dark-green pin.
                   child: Icon(
-                    LucideIcons.mapPin,
-                    size: 32,
+                    Icons.location_on_rounded,
+                    size: 36,
                     color: SureBrand.darkGreen,
                   ),
                 ),

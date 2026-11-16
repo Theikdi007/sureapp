@@ -17,7 +17,7 @@ void main() {
           title: 'Warranty',
           slivers: [
             SliverList.list(
-              children: [for (var i = 0; i < 40; i++) Text('row $i')],
+              children: [for (var i = 0; i < 80; i++) Text('row $i')],
             ),
           ],
         ),

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/push/push_registration.dart';
 import 'core/router/app_router.dart';
 import 'core/settings/theme_setting.dart';
 import 'design_system/theme/app_theme.dart';
@@ -13,6 +14,8 @@ class SureApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Keeps the push token registered while signed in (`POST devices`).
+    ref.watch(pushRegistrationProvider);
     return MaterialApp.router(
       title: 'Sure',
       debugShowCheckedModeBanner: false,

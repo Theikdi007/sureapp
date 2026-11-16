@@ -74,7 +74,7 @@ final class ContentRepositoryProvider
   }
 }
 
-String _$contentRepositoryHash() => r'86a6771d927465be047b5174d356946918b92e10';
+String _$contentRepositoryHash() => r'a68353811e3ccaf990518048031e2d3e63a69556';
 
 @ProviderFor(contentPage)
 final contentPageProvider = ContentPageFamily._();

@@ -39,7 +39,7 @@ final class SessionProvider
   Session create() => Session();
 }
 
-String _$sessionHash() => r'0d01fc51349dec0ca2308bbf85a9b8cf9b4b9dea';
+String _$sessionHash() => r'799668e60fd40e68b0e3b210a5e70f1d11918f0c';
 
 /// Who is signed in. Restored from the keychain at launch; ends when the
 /// refresh token is rejected ([sessionEndedProvider]) or on sign-out.

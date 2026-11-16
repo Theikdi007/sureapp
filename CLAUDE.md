@@ -33,8 +33,9 @@ Codegen: `dart run build_runner build -d`.
 - Missing optional fields = null.
 
 ## Environments
-Test server (Yammobots): `API_BASE_URL=https://surestoremobileapi.yammobots.com` (serves `/api/mobile/v1`; Swagger UI at `/swagger/index.html`, Scalar at `/scalar/v1`, spec at `/openapi/v1.json`. Response bodies are untyped in the spec, so check DTOs against live responses). Prod URL not published yet. `surestoreapi.yammobots.com` (SureStore shop system) and `test-surebenefitsadmin.yammobots.com` (iSure admin web panel) are backend systems: the app never calls them. Every repository has an interface with a `Mock…` impl (data from the API doc's JSON examples) and an `Api…` impl.
-Flavor/base URL come from `--dart-define=FLAVOR=mock|staging|prod --dart-define=API_BASE_URL=...`. Default is `mock`.
+Test server (Yammobots): `API_BASE_URL=https://surestoremobileapi.yammobots.com` (serves `/api/mobile/v1`; Swagger UI at `/swagger/index.html`, Scalar at `/scalar/v1`, spec at `/openapi/v1.json`. Response bodies are untyped in the spec, so check DTOs against live responses). Prod URL not published yet. `surestoreapi.yammobots.com` (SureStore shop system) and `test-surebenefitsadmin.yammobots.com` (iSure admin web panel) are backend systems: the app never calls them. Every repository has an interface and an `Api…` impl in `lib/`. The app build has **no mock or dummy data**: `Mock…` stand-ins live only in `test/support/mocks/` and tests inject them with `mockOverrides()` (`test/support/mock_overrides.dart`).
+Flavor/base URL come from `--dart-define=FLAVOR=staging|prod --dart-define=API_BASE_URL=...`. Default is `staging` on the test server above; `prod` requires `API_BASE_URL`.
+Live contract test (every read call against the server): `LIVE_PHONE=… LIVE_PASSWORD=… flutter test test/live/live_api_contract_test.dart`. Add `LIVE_WRITES=1` to run the write checks too; `test/live/live_write_flows_test.dart` places a real pay-at-pickup order, reviews and a reward claim (it prints each `CREATED …` record). Never commit credentials.
 
 ## UI requirements
 - **Liquid Glass:** use only `GlassSurface` (design_system/glass). It picks one of three tiers: shader glass on iOS 26+ capable devices, `BackdropFilter` frosted glass elsewhere, solid when performance is low or Reduce Transparency is on. Keep text contrast readable.

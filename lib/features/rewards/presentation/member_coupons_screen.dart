@@ -7,6 +7,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../design_system/components/page_scaffold.dart';
 import '../../../design_system/components/section_header.dart';
+import '../../../design_system/components/sheet_components.dart';
 import '../../../design_system/components/sure_toast.dart';
 import '../../../design_system/theme/app_theme.dart';
 import '../../../design_system/tokens/sure_metrics.dart';
@@ -35,6 +36,17 @@ class MemberCouponsScreen extends ConsumerStatefulWidget {
 class _MemberCouponsScreenState extends ConsumerState<MemberCouponsScreen> {
   final _copied = <String>{};
 
+  void _copy(MemberBenefitDto b) {
+    Clipboard.setData(ClipboardData(text: b.code!));
+    setState(() => _copied.add(b.id));
+    SureToast.show(
+      context,
+      'Coupon ${b.code} copied — use it at checkout',
+      icon: LucideIcons.ticket,
+      color: SureToastColor.positive,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final v = ref.watch(memberBenefitsProvider);
@@ -62,21 +74,19 @@ class _MemberCouponsScreenState extends ConsumerState<MemberCouponsScreen> {
             sliver: SliverList.separated(
               itemCount: value.length,
               separatorBuilder: (_, _) => const SizedBox(height: 14),
-              itemBuilder: (context, i) => CouponRow(
-                benefit: value[i],
-                applied: _copied.contains(value[i].id),
-                onApply: value[i].code == null
-                    ? null
-                    : () {
-                        Clipboard.setData(ClipboardData(text: value[i].code!));
-                        setState(() => _copied.add(value[i].id));
-                        SureToast.show(
-                          context,
-                          'Coupon ${value[i].code} copied — use it at checkout',
-                          icon: LucideIcons.ticket,
-                          color: SureToastColor.positive,
-                        );
-                      },
+              itemBuilder: (context, i) => PressScale(
+                scale: 0.98,
+                semanticLabel: value[i].title,
+                onTap: () => showMemberCouponSheet(
+                  context,
+                  value[i],
+                  onCopy: () => _copy(value[i]),
+                ),
+                child: CouponRow(
+                  benefit: value[i],
+                  applied: _copied.contains(value[i].id),
+                  onApply: value[i].code == null ? null : () => _copy(value[i]),
+                ),
               ),
             ),
           ),
@@ -108,6 +118,123 @@ class _MemberCouponsScreenState extends ConsumerState<MemberCouponsScreen> {
         },
       ],
     );
+  }
+}
+
+@riverpod
+Future<MemberBenefitDto> memberBenefitDetail(Ref ref, String id) =>
+    ref.watch(rewardsRepositoryProvider).memberBenefit(id);
+
+/// One member coupon (`GET rewards/member-benefits/{id}`) in the shared
+/// sheet: the coupon row, how to use it, terms, and the shops that take it.
+Future<void> showMemberCouponSheet(
+  BuildContext context,
+  MemberBenefitDto benefit, {
+  required VoidCallback onCopy,
+}) => showSureSheet<void>(
+  context,
+  title: benefit.title,
+  builder: (_) => _MemberCouponSheet(initial: benefit, onCopy: onCopy),
+);
+
+class _MemberCouponSheet extends ConsumerStatefulWidget {
+  const _MemberCouponSheet({required this.initial, required this.onCopy});
+
+  final MemberBenefitDto initial;
+  final VoidCallback onCopy;
+
+  @override
+  ConsumerState<_MemberCouponSheet> createState() => _MemberCouponSheetState();
+}
+
+class _MemberCouponSheetState extends ConsumerState<_MemberCouponSheet> {
+  bool _copied = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final v = ref.watch(memberBenefitDetailProvider(widget.initial.id));
+    final b = v.value ?? widget.initial;
+    Widget section(String title, Widget child) => Padding(
+      padding: const EdgeInsets.only(top: SureSpace.x4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: SureText.body3(SureTypography.bold).copyWith(color: c.ink),
+          ),
+          const SizedBox(height: SureSpace.x1),
+          child,
+        ],
+      ),
+    );
+    Text body(String s) =>
+        Text(s, style: SureText.body3().copyWith(color: c.inkFaded));
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          CouponRow(
+            benefit: b,
+            applied: _copied,
+            onApply: b.code == null
+                ? null
+                : () {
+                    setState(() => _copied = true);
+                    widget.onCopy();
+                  },
+          ),
+          if (b.instruction != null && b.instruction!.isNotEmpty)
+            section('How to use', body(b.instruction!)),
+          if (b.terms != null && b.terms!.isNotEmpty)
+            section('Terms', body(b.terms!)),
+          if (b.shops.isNotEmpty)
+            section(
+              'Where to use',
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (final s in b.shops)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        children: [
+                          Icon(
+                            LucideIcons.store,
+                            size: 16,
+                            color: c.primaryInk,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(child: body(_shopName(s))),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          if (v.isLoading && v.value == null)
+            Padding(
+              padding: const EdgeInsets.only(top: SureSpace.x4),
+              child: Center(
+                child: SizedBox.square(
+                  dimension: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: c.primaryInk,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// The API sends "Name · Name" when the shop has no separate branch line.
+  static String _shopName(String s) {
+    final parts = s.split(' · ');
+    return parts.length == 2 && parts[0] == parts[1] ? parts[0] : s;
   }
 }
 
@@ -183,8 +310,10 @@ class CouponRow extends StatelessWidget {
                       b.code!,
                       style: SureText.caption1().copyWith(
                         color: c.primaryInk,
-                        fontFamily: 'Courier',
-                        fontFamilyFallback: const ['monospace', 'Menlo'],
+                        // Prototype: a sans monospace. Menlo on iOS; Android
+                        // falls back to its sans mono.
+                        fontFamily: 'Menlo',
+                        fontFamilyFallback: const ['monospace', 'Roboto Mono'],
                       ),
                     ),
                   ),
