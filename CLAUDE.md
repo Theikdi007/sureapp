@@ -33,7 +33,7 @@ Codegen: `dart run build_runner build -d`.
 - Missing optional fields = null.
 
 ## Environments
-Test server (Yammobots): `API_BASE_URL=https://surestoremobileapi.yammobots.com` (serves `/api/mobile/v1`; OpenAPI/Scalar are not exposed there). Prod URL not published yet. `surestoreapi.yammobots.com` (SureStore shop system) and `test-surebenefitsadmin.yammobots.com` (iSure admin web panel) are backend systems: the app never calls them. Every repository has an interface with a `Mock…` impl (data from the API doc's JSON examples) and an `Api…` impl.
+Test server (Yammobots): `API_BASE_URL=https://surestoremobileapi.yammobots.com` (serves `/api/mobile/v1`; Swagger UI at `/swagger/index.html`, Scalar at `/scalar/v1`, spec at `/openapi/v1.json`. Response bodies are untyped in the spec, so check DTOs against live responses). Prod URL not published yet. `surestoreapi.yammobots.com` (SureStore shop system) and `test-surebenefitsadmin.yammobots.com` (iSure admin web panel) are backend systems: the app never calls them. Every repository has an interface with a `Mock…` impl (data from the API doc's JSON examples) and an `Api…` impl.
 Flavor/base URL come from `--dart-define=FLAVOR=mock|staging|prod --dart-define=API_BASE_URL=...`. Default is `mock`.
 
 ## UI requirements
