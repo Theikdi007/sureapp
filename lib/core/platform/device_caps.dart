@@ -36,18 +36,27 @@ class DeviceCaps {
   static const _channel = MethodChannel('sure_app/device_caps');
   static const _events = EventChannel('sure_app/reduce_transparency');
 
-  static Stream<bool> get reduceTransparencyChanges => _events
-      .receiveBroadcastStream()
-      .map((e) => e == true)
-      .handleError((Object _) {});
+  /// Live iOS Reduce Transparency changes. Only iOS has this setting (and the
+  /// native handler, ios/Runner/AppDelegate.swift); listening elsewhere made
+  /// Flutter report a MissingPluginException on Android.
+  static Stream<bool> get reduceTransparencyChanges => !kIsWeb && Platform.isIOS
+      ? _events
+            .receiveBroadcastStream()
+            .map((e) => e == true)
+            .handleError((Object _) {})
+      : const Stream<bool>.empty();
 
   static Future<DeviceCaps> load() async {
     final info = DeviceInfoPlugin();
     final pkg = await PackageInfo.fromPlatform();
     Map<String, Object?> native = const {};
     try {
-      native =
-          (await _channel.invokeMapMethod<String, Object?>('read')) ?? const {};
+      // iOS only (AppDelegate.swift); Android reads everything below.
+      if (!kIsWeb && Platform.isIOS) {
+        native =
+            (await _channel.invokeMapMethod<String, Object?>('read')) ??
+            const {};
+      }
     } on MissingPluginException {
       // Tests / unsupported platform.
     } on PlatformException catch (e) {
