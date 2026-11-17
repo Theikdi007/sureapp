@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/interceptors.dart';
@@ -14,6 +15,7 @@ import '../../../design_system/components/section_header.dart';
 import '../../../design_system/components/sure_button.dart';
 import '../../../design_system/components/sure_image.dart';
 import '../../../design_system/components/sure_toast.dart';
+import '../../../design_system/components/word_fit_text.dart';
 import '../../../design_system/glass/glass_surface.dart';
 import '../../../design_system/theme/app_theme.dart';
 import '../../../design_system/tokens/sure_colors.dart';
@@ -31,6 +33,7 @@ import '../data/catalog_repository.dart';
 import 'shop_state.dart';
 import 'catalog_providers.dart';
 import 'widgets/catalog_widgets.dart';
+import '../../../core/utils/plural.dart';
 
 /// Prototype "Product Detail". `GET products/{id}` (price and stock fresh
 /// from Cin7), `GET products/{id}/reviews`, `POST products/{id}/reviews`,
@@ -227,7 +230,7 @@ class _ProductViewState extends ConsumerState<_ProductView> {
                 ..invalidate(homeSetupBookingsProvider);
               SureToast.show(
                 context,
-                'Home visit booked · ${b.slotLabel}',
+                'Home visit booked · ${b.whenLabel}',
                 icon: LucideIcons.calendarCheck,
                 color: SureToastColor.positive,
               );
@@ -644,12 +647,15 @@ class _TopButtons extends ConsumerWidget {
           ),
           const Spacer(),
           if (product != null) ...[
-            disc(LucideIcons.share2, 'Share', () async {
-              await Clipboard.setData(ClipboardData(text: shareUrl ?? ''));
-              if (context.mounted) {
-                SureToast.show(context, 'Link copied', icon: LucideIcons.link);
-              }
-            }),
+            // Builder: its context is the disc, which the share sheet
+            // points at on iPad.
+            Builder(
+              builder: (discContext) => disc(
+                LucideIcons.share2,
+                'Share',
+                () => _share(discContext, product!.name, shareUrl),
+              ),
+            ),
             const SizedBox(width: 8),
             disc(
               LucideIcons.heart,
@@ -711,7 +717,7 @@ class _TitlePanel extends StatelessWidget {
                 p.rating.count == 0
                     ? 'No reviews yet'
                     : '${p.rating.average.toStringAsFixed(1)} '
-                          '(${p.rating.count} reviews)',
+                          '(${plural(p.rating.count, 'review')})',
                 style: SureText.body3().copyWith(color: c.inkFaded),
               ),
             ],
@@ -1302,7 +1308,7 @@ class _ReviewsPanelState extends ConsumerState<_ReviewsPanel> {
                   _loadingAll
                       ? 'Loading…'
                       : _all == null
-                      ? 'See all ${p.rating.count} reviews'
+                      ? 'See all ${plural(p.rating.count, 'review')}'
                       : 'Show fewer reviews',
                   style: SureText.body3(FontWeight.w600).copyWith(color: c.ink),
                 ),
@@ -1560,7 +1566,7 @@ class _BuyBar extends StatelessWidget {
                             style: SureText.caption1(SureTypography.medium)
                                 .copyWith(color: c.ink),
                           ),
-                          Text(
+                          WordFitText(
                             total,
                             style: SureText.body2(SureTypography.medium)
                                 .copyWith(color: c.ink),
@@ -1586,4 +1592,28 @@ class _BuyBar extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The system share sheet with the product link (`shareUrl`).
+Future<void> _share(BuildContext context, String name, String? url) async {
+  final uri = url == null ? null : Uri.tryParse(url);
+  if (uri == null || !uri.hasScheme) {
+    SureToast.show(
+      context,
+      "This product can't be shared yet.",
+      icon: LucideIcons.link,
+      color: SureToastColor.neutral,
+    );
+    return;
+  }
+  final box = context.findRenderObject() as RenderBox?;
+  await SharePlus.instance.share(
+    ShareParams(
+      uri: uri,
+      subject: name,
+      sharePositionOrigin: box == null
+          ? null
+          : box.localToGlobal(Offset.zero) & box.size,
+    ),
+  );
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/interceptors.dart';
@@ -8,10 +9,14 @@ import '../../../design_system/components/section_header.dart';
 import '../../../design_system/components/sheet_components.dart';
 import '../../../design_system/components/sure_button.dart';
 import '../../../design_system/theme/app_theme.dart';
+import '../../../design_system/tokens/sure_metrics.dart';
 import '../../../design_system/tokens/sure_typography.dart';
 import '../../cart/data/checkout_dtos.dart';
+import '../../cart/presentation/location_sheet.dart';
 import '../../catalog/presentation/widgets/catalog_widgets.dart'
     show showApiError;
+import '../../home/data/home_dtos.dart' show AddressDto;
+import '../../profile/presentation/profile_providers.dart';
 import '../data/order_dtos.dart';
 import '../data/orders_repository.dart';
 
@@ -42,6 +47,9 @@ class _ScheduleBodyState extends ConsumerState<_ScheduleBody> {
   late Future<List<HomeSetupSlotDayDto>> _days;
   String? _date;
   String? _slot;
+  // Picked in this sheet; until then the member's chosen delivery address,
+  // else their default one.
+  AddressDto? _address;
   bool _sending = false;
   IdempotencyKey? _key;
 
@@ -51,8 +59,26 @@ class _ScheduleBodyState extends ConsumerState<_ScheduleBody> {
     _days = ref.read(ordersRepositoryProvider).slots();
   }
 
+  AddressDto? _visitAddress() {
+    if (_address case final a?) return a;
+    if (ref.watch(deliveryAddressProvider) case final a?) return a;
+    final saved = ref.watch(savedAddressesProvider).value ?? const [];
+    return saved.where((a) => a.isDefault).firstOrNull ?? saved.firstOrNull;
+  }
+
+  Future<void> _changeAddress() async {
+    final picked = await showLocationSheet(
+      context,
+      selectedId: _visitAddress()?.id,
+    );
+    if (picked != null && mounted) setState(() => _address = picked);
+  }
+
   Future<void> _confirm() async {
-    if (_date == null || _slot == null || _sending) return;
+    final address = _visitAddress();
+    if (_date == null || _slot == null || address == null || _sending) {
+      return;
+    }
     _key ??= IdempotencyKey.generate();
     setState(() => _sending = true);
     try {
@@ -64,6 +90,8 @@ class _ScheduleBodyState extends ConsumerState<_ScheduleBody> {
               device: widget.device,
               date: _date!,
               slot: _slot!,
+              // The technician and the branch email need the address.
+              addressId: address.id,
             ),
             key: _key!,
           );
@@ -131,6 +159,7 @@ class _ScheduleBodyState extends ConsumerState<_ScheduleBody> {
           );
         }
         final day = days.where((d) => d.date == _date).firstOrNull;
+        final address = _visitAddress();
         return SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -184,15 +213,89 @@ class _ScheduleBodyState extends ConsumerState<_ScheduleBody> {
                   ],
                 ),
               const SizedBox(height: 18),
+              Text('Visit address', style: label),
+              const SizedBox(height: 8),
+              _AddressRow(address: address, onChange: _changeAddress),
+              const SizedBox(height: 18),
               SureButton(
                 label: 'Confirm schedule',
                 loading: _sending,
-                onPressed: _date != null && _slot != null ? _confirm : null,
+                onPressed: _date != null && _slot != null && address != null
+                    ? _confirm
+                    : null,
               ),
             ],
           ),
         );
       },
+    );
+  }
+}
+
+/// The visit address with Change (opens "Choose your location", which also
+/// lets the member add one).
+class _AddressRow extends StatelessWidget {
+  const _AddressRow({required this.address, required this.onChange});
+
+  final AddressDto? address;
+  final VoidCallback onChange;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final a = address;
+    return Semantics(
+      button: true,
+      label: a == null
+          ? 'Add a visit address'
+          : 'Visit address ${a.label}, ${a.fullText}. Change',
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onChange,
+        borderRadius: SureRadius.all(SureRadius.large),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: SureRadius.all(SureRadius.large),
+            border: Border.all(color: c.border),
+          ),
+          child: Row(
+            children: [
+              Icon(LucideIcons.mapPinHouse, size: 20, color: c.ink),
+              const SizedBox(width: 12),
+              Expanded(
+                child: a == null
+                    ? Text(
+                        'Add an address for the visit',
+                        style: SureText.body3().copyWith(color: c.inkFaded),
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            a.label,
+                            style: SureText.body3(SureTypography.medium)
+                                .copyWith(color: c.ink),
+                          ),
+                          Text(
+                            a.fullText,
+                            style: SureText.caption1().copyWith(
+                              color: c.inkFaded,
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                a == null ? 'Add' : 'Change',
+                style: SureText.body3(SureTypography.medium)
+                    .copyWith(color: c.primaryInk),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

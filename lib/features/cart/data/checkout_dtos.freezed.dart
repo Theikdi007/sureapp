@@ -2727,7 +2727,7 @@ as bool,
 /// @nodoc
 mixin _$HomeSetupSlotDayDto {
 
- String get date; String get weekday; String get day; List<HomeSetupSlotDto> get slots;
+ String get date; String get weekday; String get day;@JsonKey(fromJson: _uniqueSlots) List<HomeSetupSlotDto> get slots;
 /// Create a copy of HomeSetupSlotDayDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2765,7 +2765,7 @@ abstract mixin class $HomeSetupSlotDayDtoCopyWith<$Res>  {
   factory $HomeSetupSlotDayDtoCopyWith(HomeSetupSlotDayDto value, $Res Function(HomeSetupSlotDayDto) _then) = _$HomeSetupSlotDayDtoCopyWithImpl;
 @useResult
 $Res call({
- String date, String weekday, String day, List<HomeSetupSlotDto> slots
+ String date, String weekday, String day,@JsonKey(fromJson: _uniqueSlots) List<HomeSetupSlotDto> slots
 });
 
 
@@ -2873,7 +2873,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String date,  String weekday,  String day,  List<HomeSetupSlotDto> slots)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String date,  String weekday,  String day, @JsonKey(fromJson: _uniqueSlots)  List<HomeSetupSlotDto> slots)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _HomeSetupSlotDayDto() when $default != null:
 return $default(_that.date,_that.weekday,_that.day,_that.slots);case _:
@@ -2894,7 +2894,7 @@ return $default(_that.date,_that.weekday,_that.day,_that.slots);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String date,  String weekday,  String day,  List<HomeSetupSlotDto> slots)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String date,  String weekday,  String day, @JsonKey(fromJson: _uniqueSlots)  List<HomeSetupSlotDto> slots)  $default,) {final _that = this;
 switch (_that) {
 case _HomeSetupSlotDayDto():
 return $default(_that.date,_that.weekday,_that.day,_that.slots);case _:
@@ -2914,7 +2914,7 @@ return $default(_that.date,_that.weekday,_that.day,_that.slots);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String date,  String weekday,  String day,  List<HomeSetupSlotDto> slots)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String date,  String weekday,  String day, @JsonKey(fromJson: _uniqueSlots)  List<HomeSetupSlotDto> slots)?  $default,) {final _that = this;
 switch (_that) {
 case _HomeSetupSlotDayDto() when $default != null:
 return $default(_that.date,_that.weekday,_that.day,_that.slots);case _:
@@ -2929,14 +2929,14 @@ return $default(_that.date,_that.weekday,_that.day,_that.slots);case _:
 @JsonSerializable()
 
 class _HomeSetupSlotDayDto implements HomeSetupSlotDayDto {
-  const _HomeSetupSlotDayDto({required this.date, required this.weekday, required this.day,  List<HomeSetupSlotDto> slots = const []}): _slots = slots;
+  const _HomeSetupSlotDayDto({required this.date, required this.weekday, required this.day, @JsonKey(fromJson: _uniqueSlots)  List<HomeSetupSlotDto> slots = const []}): _slots = slots;
   factory _HomeSetupSlotDayDto.fromJson(Map<String, dynamic> json) => _$HomeSetupSlotDayDtoFromJson(json);
 
 @override final  String date;
 @override final  String weekday;
 @override final  String day;
  final  List<HomeSetupSlotDto> _slots;
-@override@JsonKey() List<HomeSetupSlotDto> get slots {
+@override@JsonKey(fromJson: _uniqueSlots) List<HomeSetupSlotDto> get slots {
   if (_slots is EqualUnmodifiableListView) return _slots;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_slots);
@@ -2978,7 +2978,7 @@ abstract mixin class _$HomeSetupSlotDayDtoCopyWith<$Res> implements $HomeSetupSl
   factory _$HomeSetupSlotDayDtoCopyWith(_HomeSetupSlotDayDto value, $Res Function(_HomeSetupSlotDayDto) _then) = __$HomeSetupSlotDayDtoCopyWithImpl;
 @override @useResult
 $Res call({
- String date, String weekday, String day, List<HomeSetupSlotDto> slots
+ String date, String weekday, String day,@JsonKey(fromJson: _uniqueSlots) List<HomeSetupSlotDto> slots
 });
 
 

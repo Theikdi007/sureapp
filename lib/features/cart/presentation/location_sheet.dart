@@ -75,7 +75,11 @@ class _LocationBody extends ConsumerWidget {
       variant: list.isEmpty
           ? SureButtonVariant.solid
           : SureButtonVariant.outline,
-      onPressed: () => showAddressSheet(context),
+      // A new address is the one the member means to use: pick it.
+      onPressed: () async {
+        final added = await showAddressSheet(context);
+        if (added != null && context.mounted) Navigator.of(context).pop(added);
+      },
     );
 
     return SingleChildScrollView(

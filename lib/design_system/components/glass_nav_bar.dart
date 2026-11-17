@@ -6,6 +6,7 @@ import '../glass/glass_surface.dart';
 import '../theme/app_theme.dart';
 import '../tokens/sure_metrics.dart';
 import '../tokens/sure_typography.dart';
+import 'word_fit_text.dart';
 
 /// The prototype's floating tab bar: a 60 pt glass pill holding the tabs,
 /// and a separate 62 pt glass circle with Search. In the prototype both
@@ -166,11 +167,11 @@ class _CellState extends State<_Cell> {
                   ),
                 ),
                 const SizedBox(height: 1),
-                Text(
+                // Shrinks to its cell with large text instead of running
+                // into the next tab's label.
+                WordFitText(
                   d.label,
                   maxLines: 1,
-                  overflow: TextOverflow.fade,
-                  softWrap: false,
                   style: SureText.caption2().copyWith(color: fg),
                 ),
               ],

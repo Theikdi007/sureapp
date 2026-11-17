@@ -21,6 +21,7 @@ import '../../../cart/presentation/cart_sheet.dart';
 import '../../../orders/presentation/orders_screen.dart'
     show requestedOrdersTabProvider;
 import '../shop_state.dart';
+import '../../../../core/utils/plural.dart';
 
 /// Toast for features that land in a later build.
 void comingSoon(BuildContext context, String what) => SureToast.show(
@@ -551,7 +552,7 @@ class RatingSummaryView extends StatelessWidget {
             StarRow(rating: summary.average, size: 14),
             const SizedBox(height: 5),
             Text(
-              '${summary.count} reviews',
+              plural(summary.count, 'review'),
               style: TextStyle(
                 fontFamily: SureTypography.fontFamily,
                 fontSize: 11,

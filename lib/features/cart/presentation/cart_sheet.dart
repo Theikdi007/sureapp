@@ -10,6 +10,7 @@ import '../../../design_system/components/sheet_components.dart';
 import '../../../design_system/components/sure_button.dart';
 import '../../../design_system/components/sure_image.dart';
 import '../../../design_system/components/sure_toast.dart';
+import '../../../design_system/components/word_fit_text.dart';
 import '../../../design_system/theme/app_theme.dart';
 import '../../../design_system/tokens/sure_metrics.dart';
 import '../../../design_system/tokens/sure_typography.dart';
@@ -106,7 +107,10 @@ class _TotalRow extends StatelessWidget {
                 'Total',
                 style: SureText.caption1().copyWith(color: c.inkFaded),
               ),
-              Text(total, style: SureText.featured3().copyWith(color: c.ink)),
+              WordFitText(
+                total,
+                style: SureText.featured3().copyWith(color: c.ink),
+              ),
             ],
           ),
         ),

@@ -148,11 +148,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
         (list) {
           // Upcoming first.
           final sorted = [...list]
-            ..sort(
-              (a, b) =>
-                  (a.status == 'Scheduled' ? 0 : 1) -
-                  (b.status == 'Scheduled' ? 0 : 1),
-            );
+            ..sort((a, b) => (a.isScheduled ? 0 : 1) - (b.isScheduled ? 0 : 1));
           return SliverList.separated(
             itemCount: sorted.length,
             separatorBuilder: (_, _) => const SizedBox(height: 16),
@@ -386,7 +382,7 @@ class BookingRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final b = booking;
-    final done = b.status != 'Scheduled';
+    final done = !b.isScheduled;
     // Prototype: completed visits use the literal mint pair (same in dark).
     final bg = done ? c.mintFaded : c.primaryFaded;
     final fg = done ? c.mintInk : c.primaryInk;
@@ -418,7 +414,7 @@ class BookingRow extends StatelessWidget {
                 ),
                 Text(
                   [
-                    b.slotLabel,
+                    b.whenLabel,
                     if (b.orderNumber != null) 'Order #${b.orderNumber}',
                   ].join(' · '),
                   style: SureText.caption1().copyWith(color: c.inkFaded),
@@ -483,6 +479,25 @@ class _BookingSheetState extends ConsumerState<_BookingSheet> {
   bool _cancelling = false;
 
   Future<void> _cancel(HomeSetupBookingDto b) async {
+    // The branch is emailed on cancel, and it can't be undone in the app.
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cancel this visit?'),
+        content: Text(b.whenLabel),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Keep visit'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Cancel visit'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
     setState(() => _cancelling = true);
     try {
       await ref.read(ordersRepositoryProvider).cancelBooking(b.number);
@@ -516,7 +531,7 @@ class _BookingSheetState extends ConsumerState<_BookingSheet> {
     final b =
         ref.watch(homeSetupBookingProvider(widget.initial.number)).value ??
         widget.initial;
-    final done = b.status != 'Scheduled';
+    final done = !b.isScheduled;
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -534,7 +549,7 @@ class _BookingSheetState extends ConsumerState<_BookingSheet> {
             child: Column(
               children: [
                 DetailRow(label: 'Visit', value: b.number),
-                DetailRow(label: 'When', value: b.slotLabel),
+                DetailRow(label: 'When', value: b.whenLabel),
                 if (b.addressText != null)
                   DetailRow(label: 'Address', value: b.addressText!),
                 if (b.orderNumber != null)

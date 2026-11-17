@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../design_system/theme/app_theme.dart';
 import '../../../design_system/tokens/sure_metrics.dart';
 import '../../../design_system/tokens/sure_typography.dart';
+import '../../../design_system/components/word_fit_text.dart';
 
 /// Tier coin artwork (`assets/images/tiers`). Unknown tiers (e.g. iSure's
 /// "newbie") fall back to the first coin.
@@ -66,7 +67,7 @@ class LoyalActions extends StatelessWidget {
                       ),
                       child: Icon(it.icon, size: 20, color: c.primaryInk),
                     ),
-                    Text(
+                    WordFitText(
                       it.label,
                       textAlign: TextAlign.center,
                       style: SureText.caption1(SureTypography.medium)

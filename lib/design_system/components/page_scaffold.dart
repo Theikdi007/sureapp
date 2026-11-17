@@ -109,7 +109,7 @@ class PageScaffold extends StatelessWidget {
       scroll = RefreshIndicator(
         color: context.colors.primaryInk,
         edgeOffset: top,
-        onRefresh: onRefresh!,
+        onRefresh: () => refreshQuietly(onRefresh!),
         child: scroll,
       );
     }
@@ -156,9 +156,12 @@ class _HeaderBlock extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(
-                height: _headerRow - 8,
-                child: Center(child: header),
+              // 56 pt at normal size; taller with large text, so the
+              // title and subtitle never run into the row below.
+              Container(
+                constraints: const BoxConstraints(minHeight: _headerRow - 8),
+                alignment: Alignment.center,
+                child: header,
               ),
               if (below != null) SizedBox(height: belowHeight, child: below),
             ],
@@ -255,5 +258,16 @@ class EmptyState extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// Runs a pull-to-refresh. A failed reload (offline, server error) is shown
+/// by the page's own error state, so it must not also escape as an
+/// unhandled error from the [RefreshIndicator].
+Future<void> refreshQuietly(Future<void> Function() refresh) async {
+  try {
+    await refresh();
+  } on Object {
+    // The provider now holds the error; the page renders it.
   }
 }

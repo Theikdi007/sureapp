@@ -395,7 +395,7 @@ class HomeSetupVisitCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final b = booking;
-    final done = b.status != 'Scheduled';
+    final done = !b.isScheduled;
     final bg = done ? c.positiveFaded : c.primaryFaded;
     final fg = done ? c.positiveInk : c.primaryInk;
     return Container(
@@ -425,7 +425,7 @@ class HomeSetupVisitCard extends StatelessWidget {
                   style: SureText.body3(FontWeight.w600).copyWith(color: c.ink),
                 ),
                 Text(
-                  '${b.slotLabel} · Technician visit',
+                  '${b.whenLabel} · Technician visit',
                   style: SureText.caption1().copyWith(color: c.inkFaded),
                 ),
               ],

@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:intl/intl.dart';
 
 import '../../../shared/models/money.dart';
 import '../../cart/data/checkout_dtos.dart';
@@ -149,4 +150,20 @@ abstract class BookHomeSetupRequest with _$BookHomeSetupRequest {
 
   factory BookHomeSetupRequest.fromJson(Map<String, dynamic> json) =>
       _$BookHomeSetupRequestFromJson(json);
+}
+
+extension HomeSetupBookingStatus on HomeSetupBookingDto {
+  /// Still to happen. The live API sends `status` in lower case
+  /// (`scheduled`, `cancelled`; `statusLabel` is the display text), so the
+  /// check ignores case.
+  bool get isScheduled => status.toLowerCase() == 'scheduled';
+
+  /// "Fri, 20 Nov · 9:00 – 12:00". `date` is the visit's calendar day
+  /// (no time zone), so it is shown as is.
+  String get whenLabel {
+    final day = DateTime.tryParse(date);
+    return day == null
+        ? slotLabel
+        : '${DateFormat('EEE, d MMM').format(day)} · $slotLabel';
+  }
 }

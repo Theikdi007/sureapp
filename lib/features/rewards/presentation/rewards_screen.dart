@@ -127,7 +127,7 @@ class RewardsScreen extends ConsumerWidget {
         body: RefreshIndicator(
           color: context.colors.primaryInk,
           edgeOffset: mq.padding.top,
-          onRefresh: refresh,
+          onRefresh: () => refreshQuietly(refresh),
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 720),

@@ -21,6 +21,7 @@ import '../../auth/presentation/app_lock_screen.dart' show LockMethodText;
 import '../../auth/presentation/auth_providers.dart';
 import '../../loyalty/data/loyalty_repository.dart';
 import '../../loyalty/presentation/loyalty_widgets.dart';
+import '../../orders/data/order_dtos.dart' show HomeSetupBookingStatus;
 import '../../loyalty/presentation/points_screen.dart';
 import '../../orders/presentation/orders_screen.dart';
 import '../../repairs/data/repairs_repository.dart';
@@ -270,7 +271,7 @@ class _SettingsList extends ConsumerWidget {
     final repairs = ref.watch(repairListProvider).value;
 
     final defaultPay = payments?.where((p) => p.isDefault).firstOrNull;
-    final upcoming = visits?.where((b) => b.status == 'Scheduled').length ?? 0;
+    final upcoming = visits?.where((b) => b.isScheduled).length ?? 0;
     final activeRepairs = repairs?.where((r) => r.active).length ?? 0;
     final services = [
       if (upcoming > 0)

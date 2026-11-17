@@ -18,13 +18,16 @@ import '../../cart/presentation/location_sheet.dart'
 import 'profile_providers.dart';
 
 /// Add ([address] null) or edit a saved address.
-Future<void> showAddressSheet(BuildContext context, {AddressDto? address}) =>
-    showSureSheet<void>(
-      context,
-      title: address == null ? 'Add New Address' : 'Edit Address',
-      maxHeightFactor: 0.9,
-      builder: (_) => _AddressForm(address: address),
-    );
+/// Returns the new address after an add; null after an edit or a dismiss.
+Future<AddressDto?> showAddressSheet(
+  BuildContext context, {
+  AddressDto? address,
+}) => showSureSheet<AddressDto>(
+  context,
+  title: address == null ? 'Add New Address' : 'Edit Address',
+  maxHeightFactor: 0.9,
+  builder: (_) => _AddressForm(address: address),
+);
 
 class _AddressForm extends ConsumerStatefulWidget {
   const _AddressForm({this.address});
@@ -123,10 +126,12 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
       _error = null;
     });
     try {
+      final AddressDto? saved;
       if (widget.address case final a?) {
         await repo.updateAddress(a.id, _request);
+        saved = null;
       } else {
-        await repo.addAddress(
+        saved = await repo.addAddress(
           _request,
           key: _key ??= IdempotencyKey.generate(),
         );
@@ -139,7 +144,7 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
         widget.address == null ? 'Address saved' : 'Address updated',
         icon: LucideIcons.mapPin,
       );
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(saved);
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e);
     } finally {
@@ -230,8 +235,8 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
       ),
     );
 
+    // The sheet itself sits above the keyboard (showSureSheet).
     return SingleChildScrollView(
-      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
       child: AutofillGroup(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

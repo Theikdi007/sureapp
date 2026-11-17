@@ -13,6 +13,7 @@ import '../../../design_system/components/section_header.dart';
 import '../../../design_system/components/sheet_components.dart';
 import '../../../design_system/components/sure_button.dart';
 import '../../../design_system/components/sure_toast.dart';
+import '../../../design_system/components/word_fit_text.dart';
 import '../../../design_system/theme/app_theme.dart';
 import '../../../design_system/tokens/sure_metrics.dart';
 import '../../../design_system/tokens/sure_typography.dart';
@@ -772,7 +773,8 @@ class _PlaceBar extends StatelessWidget {
                         AnimatedOpacity(
                           duration: SureMotion.fast,
                           opacity: quoting ? 0.4 : 1,
-                          child: Text(
+                          // The amount never splits mid-number.
+                          child: WordFitText(
                             total ?? '—',
                             style: SureText.featured3().copyWith(color: c.ink),
                           ),

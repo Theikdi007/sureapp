@@ -27,6 +27,7 @@ import '../../rewards/presentation/reward_widgets.dart';
 import '../data/loyalty_dtos.dart';
 import '../data/loyalty_repository.dart';
 import 'loyalty_widgets.dart';
+import '../../../design_system/components/word_fit_text.dart';
 
 part 'points_screen.g.dart';
 
@@ -196,6 +197,15 @@ class ShoppingPointsCard extends StatelessWidget {
     final c = context.colors;
     final s = summary;
     final cap = SureText.caption1().copyWith(color: c.inkFaded);
+    final thisMonth = s.earnedThisMonth > 0
+        ? StatusBadge(
+            label: '+${fmtPoints(s.earnedThisMonth)} pts this month',
+            color: 'positive',
+          )
+        : null;
+    // With large text the chip can't share the row: it joins the wrapping
+    // title group instead, so it gets a line of its own.
+    final bigText = MediaQuery.textScalerOf(context).scale(14) > 14 * 1.3;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
@@ -246,24 +256,21 @@ class ShoppingPointsCard extends StatelessWidget {
                           ),
                         ),
                       ),
+                      if (thisMonth != null && bigText) thisMonth,
                     ],
                   ),
                 ),
-                if (s.earnedThisMonth > 0) ...[
+                if (thisMonth != null && !bigText) ...[
                   const SizedBox(width: 8),
                   // Its own width (not half the row, which wrapped the tier
-                  // chip); capped so large text still fits.
+                  // chip); capped so it never squeezes the title.
                   ConstrainedBox(
                     constraints: BoxConstraints(
                       maxWidth: MediaQuery.sizeOf(context).width * 0.4,
                     ),
                     child: Padding(
                       padding: const EdgeInsets.only(top: 3),
-                      child: StatusBadge(
-                        label:
-                            '+${fmtPoints(s.earnedThisMonth)} pts this month',
-                        color: 'positive',
-                      ),
+                      child: thisMonth,
                     ),
                   ),
                 ],
@@ -289,7 +296,7 @@ class ShoppingPointsCard extends StatelessWidget {
                         spacing: 3,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          Text(
+                          WordFitText(
                             fmtPoints(s.points),
                             style: SureText.featured2().copyWith(color: c.ink),
                           ),
@@ -305,17 +312,30 @@ class ShoppingPointsCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text('Equivalent value', style: cap),
-                    Text(
-                      '${fmtPoints(s.equivalentMmk)} MMK',
-                      style: SureText.caption1(SureTypography.medium)
-                          .copyWith(color: c.ink),
-                    ),
-                    Text('1 pt = 1 MMK', style: cap),
-                  ],
+                // Bounded, so large text wraps by word instead of pushing
+                // the balance off the card.
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      WordFitText(
+                        'Equivalent value',
+                        style: cap,
+                        textAlign: TextAlign.end,
+                      ),
+                      WordFitText(
+                        '${fmtPoints(s.equivalentMmk)} MMK',
+                        textAlign: TextAlign.end,
+                        style: SureText.caption1(SureTypography.medium)
+                            .copyWith(color: c.ink),
+                      ),
+                      WordFitText(
+                        '1 pt = 1 MMK',
+                        style: cap,
+                        textAlign: TextAlign.end,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

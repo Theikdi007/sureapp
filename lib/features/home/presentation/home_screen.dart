@@ -14,9 +14,10 @@ import '../../../design_system/components/flash_timer.dart';
 import '../../../design_system/components/section_header.dart';
 import '../../../design_system/components/sure_button.dart';
 import '../../../design_system/components/sure_image.dart';
+import '../../../design_system/components/word_fit_text.dart';
 import '../../../design_system/glass/glass_surface.dart';
 import '../../../design_system/components/page_scaffold.dart'
-    show StatusBarStrip;
+    show StatusBarStrip, refreshQuietly;
 import '../../../design_system/theme/app_theme.dart';
 import '../../../design_system/tokens/sure_colors.dart';
 import '../../../design_system/tokens/sure_metrics.dart';
@@ -29,6 +30,7 @@ import '../data/home_dtos.dart';
 import '../../catalog/presentation/widgets/catalog_widgets.dart';
 import 'home_providers.dart';
 import '../../cart/presentation/location_sheet.dart';
+import '../../../core/utils/plural.dart';
 
 /// Home tab (prototype `HomeScreen`): deliver-to header with wishlist and
 /// bell, hero carousel, tier card, Rewards banner, What's New, Flash Deals,
@@ -81,7 +83,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: RefreshIndicator(
           color: c.primaryInk,
           edgeOffset: MediaQuery.paddingOf(context).top,
-          onRefresh: _refresh,
+          onRefresh: () => refreshQuietly(_refresh),
           child: CustomScrollView(
             key: const PageStorageKey('home'),
             slivers: [
@@ -227,16 +229,22 @@ class _CountIconButton extends StatelessWidget {
                   top: 5,
                   right: 6,
                   child: Container(
-                    constraints: const BoxConstraints(minWidth: 15),
-                    height: 15,
+                    constraints: const BoxConstraints(
+                      minWidth: 15,
+                      minHeight: 15,
+                    ),
                     padding: const EdgeInsets.symmetric(horizontal: 3),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: c.badge,
                       borderRadius: SureRadius.all(SureRadius.pill),
                     ),
+                    // Capped like a system badge: it sits on a 22 pt
+                    // icon, and the count is in the button's label.
                     child: Text(
                       count > 99 ? '99+' : '$count',
+                      textScaler: MediaQuery.textScalerOf(context)
+                          .clamp(maxScaleFactor: 1.2),
                       style: TextStyle(
                         fontFamily: SureTypography.fontFamily,
                         fontSize: 10,
@@ -518,34 +526,36 @@ class _TierCard extends ConsumerWidget {
                   style: SureText.caption1(SureTypography.medium)
                       .copyWith(color: sub),
                 ),
-                Text(
+                // Whole words, wrapping with large text (no "Classic …").
+                WordFitText(
                   '$tierLabel Member',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                   style: SureText.featured3().copyWith(color: titleInk),
                 ),
               ],
             ),
           ),
           const SizedBox(width: SureSpace.x3),
-          Padding(
-            padding: const EdgeInsets.only(right: 4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  summary == null
-                      ? '—'
-                      : NumberFormat('#,##0').format(summary.points),
-                  style: SureText.body1(SureTypography.bold)
-                      .copyWith(color: ink),
-                ),
-                Text(
-                  'Points',
-                  style: SureText.caption1(SureTypography.medium)
-                      .copyWith(color: sub),
-                ),
-              ],
+          Flexible(
+            child: Padding(
+              padding: const EdgeInsets.only(right: 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  WordFitText(
+                    summary == null
+                        ? '—'
+                        : NumberFormat('#,##0').format(summary.points),
+                    textAlign: TextAlign.end,
+                    style: SureText.body1(SureTypography.bold)
+                        .copyWith(color: ink),
+                  ),
+                  WordFitText(
+                    'Points',
+                    style: SureText.caption1(SureTypography.medium)
+                        .copyWith(color: sub),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(width: SureSpace.x2),
@@ -879,7 +889,7 @@ class _Stores extends StatelessWidget {
                                   ],
                                 ),
                                 Text(
-                                  '${v.rating} ★ · ${_count(v.productCount)} products',
+                                  '${v.rating} ★ · ${plural(v.productCount, 'product', count: _count(v.productCount))}',
                                   style: TextStyle(
                                     fontFamily: SureTypography.fontFamily,
                                     fontSize: 11,

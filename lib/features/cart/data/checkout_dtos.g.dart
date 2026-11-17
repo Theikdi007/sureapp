@@ -191,11 +191,7 @@ _HomeSetupSlotDayDto _$HomeSetupSlotDayDtoFromJson(Map<String, dynamic> json) =>
       date: json['date'] as String,
       weekday: json['weekday'] as String,
       day: json['day'] as String,
-      slots:
-          (json['slots'] as List<dynamic>?)
-              ?.map((e) => HomeSetupSlotDto.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
+      slots: json['slots'] == null ? const [] : _uniqueSlots(json['slots']),
     );
 
 Map<String, dynamic> _$HomeSetupSlotDayDtoToJson(

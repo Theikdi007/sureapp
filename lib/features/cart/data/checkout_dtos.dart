@@ -165,11 +165,23 @@ abstract class HomeSetupSlotDayDto with _$HomeSetupSlotDayDto {
     required String date,
     required String weekday,
     required String day,
-    @Default([]) List<HomeSetupSlotDto> slots,
+    @JsonKey(fromJson: _uniqueSlots) @Default([]) List<HomeSetupSlotDto> slots,
   }) = _HomeSetupSlotDayDto;
 
   factory HomeSetupSlotDayDto.fromJson(Map<String, dynamic> json) =>
       _$HomeSetupSlotDayDtoFromJson(json);
+}
+
+/// The test server lists each slot twice per day; one chip per slot (and
+/// one selected chip) needs them unique. First one wins.
+List<HomeSetupSlotDto> _uniqueSlots(Object? json) {
+  final seen = <String>{};
+  return [
+    for (final e in (json as List<dynamic>? ?? const []))
+      if (HomeSetupSlotDto.fromJson(e as Map<String, dynamic>) case final s
+          when seen.add(s.slot))
+        s,
+  ];
 }
 
 /// Points shown at checkout. Paying with points is a later release:

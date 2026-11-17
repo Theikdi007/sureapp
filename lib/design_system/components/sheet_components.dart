@@ -24,15 +24,19 @@ Future<T?> showSureSheet<T>(
   useSafeArea: true,
   backgroundColor: Colors.transparent,
   barrierColor: context.colors.scrim,
-  builder: (context) => ConstrainedBox(
-    constraints: BoxConstraints(
-      maxHeight: MediaQuery.sizeOf(context).height * maxHeightFactor,
-      maxWidth: 640,
-    ),
-    child: SureSheet(
-      title: title,
-      showClose: showClose,
-      child: builder(context),
+  // Lifted above the keyboard, so a sheet's text field stays in view.
+  builder: (context) => Padding(
+    padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+    child: ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * maxHeightFactor,
+        maxWidth: 640,
+      ),
+      child: SureSheet(
+        title: title,
+        showClose: showClose,
+        child: builder(context),
+      ),
     ),
   ),
 );
@@ -442,7 +446,9 @@ class QtyStepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    Widget btn(String glyph, String label, VoidCallback? onTap) => Semantics(
+    // Icons, not "−"/"+" text: they keep their size with large text, where
+    // text glyphs outgrew the 28 pt buttons.
+    Widget btn(IconData icon, String label, VoidCallback? onTap) => Semantics(
       button: true,
       label: label,
       excludeSemantics: true,
@@ -452,10 +458,10 @@ class QtyStepper extends StatelessWidget {
         child: SizedBox.square(
           dimension: 28,
           child: Center(
-            child: Text(
-              glyph,
-              style: SureText.body2(FontWeight.w600)
-                  .copyWith(color: onTap == null ? c.disabledInk : c.ink),
+            child: Icon(
+              icon,
+              size: 14,
+              color: onTap == null ? c.disabledInk : c.ink,
             ),
           ),
         ),
@@ -470,12 +476,12 @@ class QtyStepper extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           btn(
-            '−',
+            LucideIcons.minus,
             'Decrease quantity',
             qty > min ? () => onChanged(qty - 1) : null,
           ),
-          SizedBox(
-            width: 24,
+          ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 24),
             child: Text(
               '$qty',
               textAlign: TextAlign.center,
@@ -488,7 +494,7 @@ class QtyStepper extends StatelessWidget {
             ),
           ),
           btn(
-            '+',
+            LucideIcons.plus,
             'Increase quantity',
             qty < max ? () => onChanged(qty + 1) : null,
           ),

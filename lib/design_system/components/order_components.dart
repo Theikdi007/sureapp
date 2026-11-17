@@ -28,8 +28,9 @@ class StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final (bg, fg, _) = statusColors(context.colors, color);
     return Container(
-      height: 18,
-      padding: const EdgeInsets.symmetric(horizontal: 6),
+      // 18 pt at normal size; grows with large text instead of clipping.
+      constraints: const BoxConstraints(minHeight: 18),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: SureRadius.all(SureRadius.pill),

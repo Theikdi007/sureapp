@@ -14,6 +14,7 @@ import '../../../design_system/components/sure_toast.dart';
 import '../../../design_system/theme/app_theme.dart';
 import '../../../design_system/tokens/sure_metrics.dart';
 import '../../../design_system/tokens/sure_typography.dart';
+import '../../orders/data/order_dtos.dart' show HomeSetupBookingStatus;
 import '../../orders/presentation/orders_screen.dart';
 import '../../stores/presentation/find_store_screen.dart';
 import '../../app_config/data/app_config_repository.dart';
@@ -119,7 +120,7 @@ class SupportScreen extends ConsumerWidget {
               if (ref
                       .watch(homeSetupBookingsProvider)
                       .value
-                      ?.where((b) => b.status == 'Scheduled')
+                      ?.where((b) => b.isScheduled)
                   case final upcoming? when upcoming.isNotEmpty) ...[
                 const SectionHeader(
                   title: 'Home Setup Visits',

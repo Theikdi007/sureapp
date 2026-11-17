@@ -20,9 +20,8 @@ Future<bool?> photoTopIsLight(Ref ref, String url) async {
     return null;
   }
   final completer = Completer<ui.Image>();
-  final stream = CachedNetworkImageProvider(
-    url,
-  ).resolve(ImageConfiguration.empty);
+  final stream = CachedNetworkImageProvider(url)
+      .resolve(ImageConfiguration.empty);
   late final ImageStreamListener listener;
   listener = ImageStreamListener(
     (info, _) {

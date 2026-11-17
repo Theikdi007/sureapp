@@ -23,6 +23,7 @@ import 'shop_state.dart';
 import 'catalog_providers.dart';
 import 'product_detail_screen.dart' show RateBox;
 import 'widgets/catalog_widgets.dart';
+import '../../../core/utils/plural.dart';
 
 /// Loading / error / data slivers for a simple list screen.
 List<Widget> _asyncSlivers<T>(
@@ -234,7 +235,7 @@ class StoresScreen extends ConsumerWidget {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                '${v.rating} ★ · ${v.productCount} products',
+                                '${v.rating} ★ · ${plural(v.productCount, 'product')}',
                                 style: TextStyle(
                                   fontFamily: SureTypography.fontFamily,
                                   fontSize: 11,

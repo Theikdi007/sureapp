@@ -44,6 +44,9 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
 
   void _type(String d) {
     if (_loading || _digits.length >= _maxDigits) return;
+    // The box already shows +95, so the trunk 0 of `09…` is not a digit:
+    // counting it would cut off the number's last digit.
+    if (_digits.isEmpty && d == '0') return;
     setState(() {
       _digits += d;
       _error = null;

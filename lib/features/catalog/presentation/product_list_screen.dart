@@ -15,6 +15,7 @@ import '../data/catalog_dtos.dart';
 import '../data/catalog_repository.dart';
 import 'catalog_providers.dart';
 import 'widgets/catalog_widgets.dart';
+import '../../../core/utils/plural.dart';
 
 /// Prototype "Browse": header, search + filter button (pinned under the
 /// header, glass when scrolled), filter panel, product grid, empty states.
@@ -80,7 +81,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
         ? 'Limited-time offers'
         : data == null
         ? null
-        : '${data.result.total} products';
+        : plural(data.result.total, 'product');
 
     final facets = data?.result.facets ?? const SearchFacetsDto();
 

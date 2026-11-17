@@ -32,4 +32,11 @@ void main() {
     // Scrolled away, as in the prototype; the strip stays at the top.
     expect(find.text('Warranty').hitTestable(), findsNothing);
   });
+
+  test('a failed pull-to-refresh does not escape', () async {
+    await expectLater(
+      refreshQuietly(() async => throw Exception('offline')),
+      completes,
+    );
+  });
 }
