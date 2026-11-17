@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../glass/glass_surface.dart';
+import '../glass/liquid_glass.dart';
 import '../theme/app_theme.dart';
 import '../tokens/sure_metrics.dart';
 import '../tokens/sure_typography.dart';
@@ -13,7 +16,11 @@ import 'page_header.dart';
 /// as a strip of page colour ([StatusBarStrip]) so the clock remains
 /// readable over scrolled content. [pinnedBelowHeader] (e.g. a search row)
 /// sits under the header and scrolls with it.
-class PageScaffold extends StatelessWidget {
+///
+/// iOS 26 (Liquid Glass): the status bar area, header and
+/// [pinnedBelowHeader] form one pinned glass bar the content scrolls
+/// under, as in Apple's own apps.
+class PageScaffold extends ConsumerWidget {
   const PageScaffold({
     super.key,
     required this.title,
@@ -65,31 +72,46 @@ class PageScaffold extends StatelessWidget {
   static const double sidePadding = 20;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final mq = MediaQuery.of(context);
     final top = mq.padding.top;
+    final liquid = liquidGlassOn(context, ref);
+    final header = showHeader
+        ? _HeaderBlock(
+            maxWidth: maxContentWidth,
+            header: PageHeader(
+              title: title,
+              subtitle: subtitle,
+              onBack: showBack
+                  ? (onBack ?? () => Navigator.of(context).maybePop())
+                  : null,
+              actions: actions,
+            ),
+            below: pinnedBelowHeader,
+            belowHeight: pinnedHeight,
+          )
+        : null;
     Widget scroll = CustomScrollView(
       controller: controller,
       slivers: [
-        const StatusBarStrip(),
-        if (!showHeader)
-          const SliverToBoxAdapter(child: SizedBox(height: 8))
-        else
-          SliverToBoxAdapter(
-            child: _HeaderBlock(
-              maxWidth: maxContentWidth,
-              header: PageHeader(
-                title: title,
-                subtitle: subtitle,
-                onBack: showBack
-                    ? (onBack ?? () => Navigator.of(context).maybePop())
-                    : null,
-                actions: actions,
+        if (liquid)
+          PinnedHeaderSliver(
+            child: GlassSurface(
+              borderRadius: BorderRadius.zero,
+              shadow: false,
+              child: Padding(
+                padding: EdgeInsets.only(top: top, bottom: 8),
+                child: header ?? const SizedBox(height: 0),
               ),
-              below: pinnedBelowHeader,
-              belowHeight: pinnedHeight,
             ),
-          ),
+          )
+        else ...[
+          const StatusBarStrip(),
+          if (header == null)
+            const SliverToBoxAdapter(child: SizedBox(height: 8))
+          else
+            SliverToBoxAdapter(child: header),
+        ],
         if (showHeader &&
             pinnedBelowHeader == null &&
             headerGap > _headerRowGap)
@@ -108,7 +130,8 @@ class PageScaffold extends StatelessWidget {
     if (onRefresh != null) {
       scroll = RefreshIndicator(
         color: context.colors.primaryInk,
-        edgeOffset: top,
+        // Under the pinned glass bar on iOS 26, else under the status bar.
+        edgeOffset: liquid && showHeader ? top + 64 + pinnedHeight : top,
         onRefresh: () => refreshQuietly(onRefresh!),
         child: scroll,
       );
@@ -163,7 +186,14 @@ class _HeaderBlock extends StatelessWidget {
                 alignment: Alignment.center,
                 child: header,
               ),
-              if (below != null) SizedBox(height: belowHeight, child: below),
+              // At least [belowHeight]; taller when its content needs it
+              // (a glass tab capsule, large text).
+              if (below != null)
+                Container(
+                  constraints: BoxConstraints(minHeight: belowHeight),
+                  alignment: Alignment.center,
+                  child: below,
+                ),
             ],
           ),
         ),
@@ -187,15 +217,22 @@ class StatusBarStrip extends StatelessWidget {
     delegate: _StripDelegate(
       height: MediaQuery.paddingOf(context).top,
       color: color ?? context.colors.page,
+      // iOS 26: glass, like the system's status bar over scrolled content.
+      glass: color == null,
     ),
   );
 }
 
 class _StripDelegate extends SliverPersistentHeaderDelegate {
-  _StripDelegate({required this.height, required this.color});
+  _StripDelegate({
+    required this.height,
+    required this.color,
+    this.glass = false,
+  });
 
   final double height;
   final Color color;
+  final bool glass;
 
   @override
   double get minExtent => height;
@@ -203,13 +240,25 @@ class _StripDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => height;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlaps) =>
-      // Must fill the extent: an unsized box would paint 0 of it.
-      SizedBox.expand(child: ColoredBox(color: color));
+  Widget build(BuildContext context, double shrinkOffset, bool overlaps) {
+    // Must fill the extent: an unsized box would paint 0 of it.
+    final solid = SizedBox.expand(child: ColoredBox(color: color));
+    if (!glass) return solid;
+    return LiquidGlassSwitch(
+      liquid: (_) => const SizedBox.expand(
+        child: GlassSurface(
+          borderRadius: BorderRadius.zero,
+          shadow: false,
+          child: SizedBox.expand(),
+        ),
+      ),
+      otherwise: (_) => solid,
+    );
+  }
 
   @override
   bool shouldRebuild(_StripDelegate old) =>
-      old.height != height || old.color != color;
+      old.height != height || old.color != color || old.glass != glass;
 }
 
 /// Design system `EmptyState`: 40 pt disabled-color icon, body-1 bold title,

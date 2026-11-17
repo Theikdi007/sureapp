@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../glass/glass_surface.dart';
+import '../glass/liquid_glass.dart';
 import '../theme/app_theme.dart';
 import '../tokens/sure_metrics.dart';
 import '../tokens/sure_typography.dart';
@@ -40,15 +42,38 @@ class PageHeader extends StatelessWidget {
               button: true,
               label: MaterialLocalizations.of(context).backButtonTooltip,
               excludeSemantics: true,
-              child: Material(
-                color: c.neutralFaded,
-                shape: const CircleBorder(),
-                clipBehavior: Clip.antiAlias,
-                child: InkWell(
-                  onTap: onBack,
-                  child: SizedBox.square(
-                    dimension: 40,
-                    child: Icon(LucideIcons.arrowLeft, size: 20, color: c.ink),
+              // iOS 26: a glass disc, like the system back button.
+              child: LiquidGlassSwitch(
+                liquid: (_) => GlassSurface(
+                  borderRadius: SureRadius.all(SureRadius.pill),
+                  interactive: true,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: onBack,
+                    child: SizedBox.square(
+                      dimension: 40,
+                      child: Icon(
+                        LucideIcons.arrowLeft,
+                        size: 20,
+                        color: c.ink,
+                      ),
+                    ),
+                  ),
+                ),
+                otherwise: (_) => Material(
+                  color: c.neutralFaded,
+                  shape: const CircleBorder(),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: onBack,
+                    child: SizedBox.square(
+                      dimension: 40,
+                      child: Icon(
+                        LucideIcons.arrowLeft,
+                        size: 20,
+                        color: c.ink,
+                      ),
+                    ),
                   ),
                 ),
               ),

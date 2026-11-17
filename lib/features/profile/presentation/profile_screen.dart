@@ -10,6 +10,7 @@ import '../../../design_system/components/page_scaffold.dart';
 import '../../../design_system/components/section_header.dart';
 import '../../../design_system/components/sheet_components.dart';
 import '../../../design_system/components/sure_button.dart';
+import '../../../design_system/components/sure_dialog.dart';
 import '../../../design_system/components/sure_toast.dart';
 import '../../../design_system/theme/app_theme.dart';
 import '../../../design_system/tokens/sure_metrics.dart';
@@ -48,7 +49,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Future<void> _signOut() async {
     final ok = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => SureDialog(
         title: const Text('Log out?'),
         content: const Text('You can sign in again with your phone number.'),
         actions: [

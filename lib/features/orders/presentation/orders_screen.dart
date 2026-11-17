@@ -12,6 +12,7 @@ import '../../../design_system/components/section_header.dart';
 import '../../../design_system/components/service_components.dart';
 import '../../../design_system/components/sheet_components.dart';
 import '../../../design_system/components/sure_button.dart';
+import '../../../design_system/components/sure_dialog.dart';
 import '../../../design_system/components/sure_toast.dart';
 import '../../../design_system/components/sure_image.dart';
 import '../../../design_system/theme/app_theme.dart';
@@ -482,7 +483,7 @@ class _BookingSheetState extends ConsumerState<_BookingSheet> {
     // The branch is emailed on cancel, and it can't be undone in the app.
     final ok = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => SureDialog(
         title: const Text('Cancel this visit?'),
         content: Text(b.whenLabel),
         actions: [

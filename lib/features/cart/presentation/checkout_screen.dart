@@ -8,6 +8,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/interceptors.dart';
 import '../../../core/router/routes.dart';
+import '../../../design_system/components/bottom_bar_surface.dart';
 import '../../../design_system/components/page_scaffold.dart';
 import '../../../design_system/components/section_header.dart';
 import '../../../design_system/components/sheet_components.dart';
@@ -740,62 +741,46 @@ class _PlaceBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return // Prototype footer: page fill (no glass), top hairline.
-    ColoredBox(
-      color: c.page,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: c.boxBorderFaded)),
-        ),
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            20,
-            14,
-            20,
-            14 + MediaQuery.paddingOf(context).bottom,
-          ),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 720),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Total',
-                          style: SureText.caption1().copyWith(
-                            color: c.inkFaded,
-                          ),
-                        ),
-                        AnimatedOpacity(
-                          duration: SureMotion.fast,
-                          opacity: quoting ? 0.4 : 1,
-                          // The amount never splits mid-number.
-                          child: WordFitText(
-                            total ?? '—',
-                            style: SureText.featured3().copyWith(color: c.ink),
-                          ),
-                        ),
-                      ],
+    return BottomBarSurface(
+      hairline: c.boxBorderFaded,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 720),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Total',
+                      style: SureText.caption1().copyWith(color: c.inkFaded),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(minWidth: 150),
-                    child: SureButton(
-                      label: 'Place Order',
-                      endIcon: LucideIcons.arrowRight,
-                      fullWidth: false,
-                      loading: loading,
-                      onPressed: enabled ? onPlace : null,
+                    AnimatedOpacity(
+                      duration: SureMotion.fast,
+                      opacity: quoting ? 0.4 : 1,
+                      // The amount never splits mid-number.
+                      child: WordFitText(
+                        total ?? '—',
+                        style: SureText.featured3().copyWith(color: c.ink),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
+              const SizedBox(width: 16),
+              ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 150),
+                child: SureButton(
+                  label: 'Place Order',
+                  endIcon: LucideIcons.arrowRight,
+                  fullWidth: false,
+                  loading: loading,
+                  onPressed: enabled ? onPlace : null,
+                ),
+              ),
+            ],
           ),
         ),
       ),

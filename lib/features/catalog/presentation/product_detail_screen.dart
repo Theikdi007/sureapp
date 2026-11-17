@@ -9,6 +9,7 @@ import '../../../core/network/api_exception.dart';
 import '../../../core/network/interceptors.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/utils/myanmar_time.dart';
+import '../../../design_system/components/bottom_bar_surface.dart';
 import '../../../design_system/components/page_scaffold.dart';
 import '../../../design_system/components/photo_brightness.dart';
 import '../../../design_system/components/section_header.dart';
@@ -1540,53 +1541,45 @@ class _BuyBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final bottom = MediaQuery.paddingOf(context).bottom;
-    return // Prototype footer: page fill (no glass), top hairline.
-    ColoredBox(
-      color: c.page,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: c.boxBorder)),
-        ),
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(16, 16, 16, bottom > 0 ? bottom : 16),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 840),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Total',
-                            style: SureText.caption1(SureTypography.medium)
-                                .copyWith(color: c.ink),
-                          ),
-                          WordFitText(
-                            total,
-                            style: SureText.body2(SureTypography.medium)
-                                .copyWith(color: c.ink),
-                          ),
-                        ],
+    return BottomBarSurface(
+      hairline: c.boxBorder,
+      padding: EdgeInsets.fromLTRB(16, 16, 16, bottom > 0 ? 0 : 16),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 840),
+          child: Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Total',
+                        style: SureText.caption1(SureTypography.medium)
+                            .copyWith(color: c.ink),
                       ),
-                    ),
+                      WordFitText(
+                        total,
+                        style: SureText.body2(SureTypography.medium)
+                            .copyWith(color: c.ink),
+                      ),
+                    ],
                   ),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(minWidth: 140),
-                    child: SureButton(
-                      label: enabled ? 'Add to Cart' : 'Sold out',
-                      fullWidth: false,
-                      loading: loading,
-                      onPressed: enabled ? onAdd : null,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+              ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 140),
+                child: SureButton(
+                  label: enabled ? 'Add to Cart' : 'Sold out',
+                  fullWidth: false,
+                  loading: loading,
+                  onPressed: enabled ? onAdd : null,
+                ),
+              ),
+            ],
           ),
         ),
       ),

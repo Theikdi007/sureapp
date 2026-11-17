@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../glass/glass_surface.dart';
+import '../glass/liquid_glass.dart';
 import '../theme/app_theme.dart';
 import '../tokens/sure_metrics.dart';
 import '../tokens/sure_typography.dart';
@@ -73,6 +75,28 @@ class _ToastView extends StatelessWidget {
       SureToastColor.neutral => (c.neutralFaded, c.borderFaded, c.ink),
     };
     final top = MediaQuery.paddingOf(context).top + SureSpace.x2;
+    final content = Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: SureSpace.x3,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 1),
+            child: Icon(icon, size: 20, color: fg),
+          ),
+          const SizedBox(width: SureSpace.x3),
+          Expanded(
+            child: Text(
+              message,
+              style: SureText.body3().copyWith(color: c.inkFaded),
+            ),
+          ),
+        ],
+      ),
+    );
     return Positioned(
       left: SureSpace.x4,
       right: SureSpace.x4,
@@ -93,33 +117,22 @@ class _ToastView extends StatelessWidget {
             constraints: const BoxConstraints(maxWidth: 480),
             child: Semantics(
               liveRegion: true,
-              child: Material(
-                color: bg,
-                shape: RoundedRectangleBorder(
+              // iOS 26: glass tinted with the status colour; elsewhere the
+              // prototype's solid alert.
+              child: LiquidGlassSwitch(
+                liquid: (_) => GlassSurface(
                   borderRadius: SureRadius.all(SureRadius.medium),
-                  side: BorderSide(color: border),
+                  tint: bg.withValues(alpha: 0.88),
+                  solidColor: bg,
+                  child: content,
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: SureSpace.x3,
+                otherwise: (_) => Material(
+                  color: bg,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: SureRadius.all(SureRadius.medium),
+                    side: BorderSide(color: border),
                   ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 1),
-                        child: Icon(icon, size: 20, color: fg),
-                      ),
-                      const SizedBox(width: SureSpace.x3),
-                      Expanded(
-                        child: Text(
-                          message,
-                          style: SureText.body3().copyWith(color: c.inkFaded),
-                        ),
-                      ),
-                    ],
-                  ),
+                  child: content,
                 ),
               ),
             ),

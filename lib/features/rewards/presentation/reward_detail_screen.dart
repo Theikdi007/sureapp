@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/interceptors.dart';
 import '../../../core/utils/myanmar_time.dart';
+import '../../../design_system/components/bottom_bar_surface.dart';
 import '../../../design_system/components/page_scaffold.dart';
 import '../../../design_system/components/section_header.dart';
 import '../../../design_system/components/sheet_components.dart';
@@ -419,43 +420,25 @@ class _ClaimBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return // Prototype footer: page fill (no glass), top hairline.
-    ColoredBox(
-      color: c.page,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: c.boxBorderFaded)),
-        ),
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            20,
-            14,
-            20,
-            14 + MediaQuery.paddingOf(context).bottom,
-          ),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 720),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SureButton(
-                    label: label,
-                    loading: loading,
-                    onPressed: onPressed,
-                  ),
-                  if (hint case final h? when h.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      h,
-                      textAlign: TextAlign.center,
-                      style: SureTypography.style(size: 11, color: c.inkFaded),
-                    ),
-                  ],
-                ],
-              ),
-            ),
+    return BottomBarSurface(
+      hairline: c.boxBorderFaded,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 720),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SureButton(label: label, loading: loading, onPressed: onPressed),
+              if (hint case final h? when h.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  h,
+                  textAlign: TextAlign.center,
+                  style: SureTypography.style(size: 11, color: c.inkFaded),
+                ),
+              ],
+            ],
           ),
         ),
       ),

@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/router/routes.dart';
+import '../../../design_system/components/bottom_bar_surface.dart';
 import '../../../design_system/components/page_scaffold.dart';
 import '../../../design_system/components/sheet_components.dart';
 import '../../../design_system/components/sure_button.dart';
@@ -266,25 +267,11 @@ class CartScreen extends ConsumerWidget {
       },
       bottomBar: cart == null || cart.lines.isEmpty
           ? null
-          : // Prototype footer: page fill (no glass), top hairline.
-            ColoredBox(
-              color: c.page,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  border: Border(top: BorderSide(color: c.boxBorderFaded)),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    20,
-                    14,
-                    20,
-                    14 + MediaQuery.paddingOf(context).bottom,
-                  ),
-                  child: _TotalRow(
-                    total: cart.subtotal.displayCode,
-                    onCheckout: () => context.push(AppRoutes.checkout),
-                  ),
-                ),
+          : BottomBarSurface(
+              hairline: c.boxBorderFaded,
+              child: _TotalRow(
+                total: cart.subtotal.displayCode,
+                onCheckout: () => context.push(AppRoutes.checkout),
               ),
             ),
       slivers: [

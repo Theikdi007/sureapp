@@ -271,11 +271,11 @@ class _HomeContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bottom = MediaQuery.paddingOf(context).bottom;
-    // (section, padded). Unpadded sections bleed to the edges: the tier
-    // card and the horizontal rails (which pad their own headers).
+    // (section, padded). Unpadded sections bleed to the edges: the
+    // horizontal rails (which pad their own headers).
     final sections = <(Widget, bool)>[
       if (home.hero.isNotEmpty) (_HeroCarousel(banners: home.hero), true),
-      (const _TierCard(), false),
+      (const _TierCard(), true),
       (const _RewardsBanner(), true),
       if (home.whatsNew.isNotEmpty) (_WhatsNew(banners: home.whatsNew), true),
       if (home.flashDeals.items.isNotEmpty)
@@ -475,20 +475,69 @@ class _HeroCarouselState extends State<_HeroCarousel> {
 
 // ─── Tier card ───────────────────────────────────────────────────────────
 
-/// Member card: tier gradient (full bleed, radius 28) around a white card
-/// (radius 24) with "Tier Level", the tier name, points and the tier coin.
-/// VSP and above get a Liquid Glass inner card with white text.
+/// The tier's colours: a gradient backdrop and two soft glows for the glass
+/// to bend, and whether the text on the glass is white.
+typedef _TierPalette = ({
+  List<Color> base,
+  Color glowA,
+  Color glowB,
+  bool whiteText,
+});
+
+/// Member card: a tier-coloured backdrop (gradient, two soft glows and a
+/// faint tier coin) under a glass panel with "Tier Level", the tier name,
+/// points and the tier coin. Liquid Glass on iOS 26, frosted elsewhere,
+/// solid with Reduce Transparency.
 class _TierCard extends ConsumerWidget {
   const _TierCard();
 
-  static const _gradients = [
-    [Color(0xFFE6EDF3), Color(0xFFD8E1EE)], // classic
-    [Color(0xFFEFE5FF), Color(0xFF816EA2)], // exclusive
-    [Color(0xFFE2B254), Color(0xFF8A5C14)], // vsp
-    [Color(0xFF707885), Color(0xFF1E2229)], // vvsp
-    [Color(0xFF14372D), Color(0xFF001400)], // xsp
+  static const List<_TierPalette> _light = [
+    // classic
+    (
+      base: [Color(0xFFF1F0FF), Color(0xFFE3E9F7)],
+      glowA: Color(0x80A78BFA),
+      glowB: Color(0x7360A5FA),
+      whiteText: false,
+    ),
+    // exclusive
+    (
+      base: [Color(0xFFFFF2E8), Color(0xFFF2E6FF)],
+      glowA: Color(0x80FB923C),
+      glowB: Color(0x73C084FC),
+      whiteText: false,
+    ),
+    // vsp
+    (
+      base: [Color(0xFFE2B254), Color(0xFF8A5C14)],
+      glowA: Color(0x99FDE68A),
+      glowB: Color(0x80B45309),
+      whiteText: true,
+    ),
+    // vvsp
+    (
+      base: [Color(0xFF707885), Color(0xFF1E2229)],
+      glowA: Color(0x66CBD5E1),
+      glowB: Color(0x80475569),
+      whiteText: true,
+    ),
+    // xsp
+    (
+      base: [Color(0xFF14372D), Color(0xFF001400)],
+      glowA: Color(0x73A0F04B),
+      glowB: Color(0x5973D755),
+      whiteText: true,
+    ),
   ];
+
+  /// Dark mode: the light tiers get a dark backdrop (their light one glared
+  /// on the dark page); the dark tiers are already dark.
+  static const List<List<Color>> _darkBase = [
+    [Color(0xFF221E33), Color(0xFF171A26)],
+    [Color(0xFF2A1F1A), Color(0xFF1F1A2B)],
+  ];
+
   static const _tierInk = [Color(0xFF9333EA), Color(0xFFBA5820)];
+  static const _tierInkOnDark = [Color(0xFFC4A1FF), Color(0xFFF2A46C)];
   static const _coins = ['classic', 'exclusive', 'vsp', 'vvsp', 'xsp'];
 
   static int _index(String tier) => switch (tier.toLowerCase()) {
@@ -502,19 +551,25 @@ class _TierCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
+    final darkTheme = Theme.of(context).brightness == Brightness.dark;
     final summary = ref.watch(loyaltySummaryProvider).value;
     final session = ref.watch(sessionProvider).value;
     final member = session is SignedIn ? session.member : null;
     final tier = summary?.tier ?? member?.tier ?? 'classic';
     final tierLabel = summary?.tierLabel ?? member?.tierLabel ?? 'Classic';
     final idx = _index(tier);
-    final dark = idx >= 2;
-    final ink = dark ? Colors.white : c.ink;
-    final sub = dark ? Colors.white.withValues(alpha: 0.8) : c.inkFaded;
-    final titleInk = dark ? Colors.white : _tierInk[idx];
+    final palette = _light[idx];
+    final white = palette.whiteText;
+    final base = darkTheme && !white ? _darkBase[idx] : palette.base;
+    final ink = white ? Colors.white : c.ink;
+    final sub = white ? Colors.white.withValues(alpha: 0.8) : c.inkFaded;
+    final titleInk = white
+        ? Colors.white
+        : (darkTheme ? _tierInkOnDark[idx] : _tierInk[idx]);
+    final coin = 'assets/images/tiers/${_coins[idx]}.svg';
 
     final inner = Padding(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(18, 16, 14, 16),
       child: Row(
         children: [
           Expanded(
@@ -526,7 +581,7 @@ class _TierCard extends ConsumerWidget {
                   style: SureText.caption1(SureTypography.medium)
                       .copyWith(color: sub),
                 ),
-                // Whole words, wrapping with large text (no "Classic …").
+                // Whole words; wraps only with large text.
                 WordFitText(
                   '$tierLabel Member',
                   style: SureText.featured3().copyWith(color: titleInk),
@@ -535,32 +590,26 @@ class _TierCard extends ConsumerWidget {
             ),
           ),
           const SizedBox(width: SureSpace.x3),
-          Flexible(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 4),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  WordFitText(
-                    summary == null
-                        ? '—'
-                        : NumberFormat('#,##0').format(summary.points),
-                    textAlign: TextAlign.end,
-                    style: SureText.body1(SureTypography.bold)
-                        .copyWith(color: ink),
-                  ),
-                  WordFitText(
-                    'Points',
-                    style: SureText.caption1(SureTypography.medium)
-                        .copyWith(color: sub),
-                  ),
-                ],
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                summary == null
+                    ? '—'
+                    : NumberFormat('#,##0').format(summary.points),
+                maxLines: 1,
+                style: SureText.body1(SureTypography.bold).copyWith(color: ink),
               ),
-            ),
+              Text(
+                'Points',
+                style: SureText.caption1(SureTypography.medium)
+                    .copyWith(color: sub),
+              ),
+            ],
           ),
-          const SizedBox(width: SureSpace.x2),
+          const SizedBox(width: SureSpace.x3),
           SvgPicture.asset(
-            'assets/images/tiers/${_coins[idx]}.svg',
+            coin,
             width: 44,
             height: 44,
             excludeFromSemantics: true,
@@ -578,47 +627,86 @@ class _TierCard extends ConsumerWidget {
       child: PressScale(
         scale: 0.985,
         onTap: () => context.go(AppRoutes.profile),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            borderRadius: SureRadius.all(SureRadius.xl2),
-            gradient: LinearGradient(
-              begin: const Alignment(-0.892, -0.453),
-              end: const Alignment(0.892, 0.453),
-              colors: _gradients[idx],
-              stops: const [0.1216, 0.7358],
-            ),
-          ),
-          child: dark
-              ? GlassSurface(
-                  borderRadius: SureRadius.all(SureRadius.xl),
-                  tint: Colors.white.withValues(alpha: 0.2),
-                  solidColor: Colors.black.withValues(alpha: 0.25),
-                  child: inner,
-                )
-              : DecoratedBox(
+        child: ClipRRect(
+          borderRadius: SureRadius.all(SureRadius.xl2),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: c.raised,
-                    borderRadius: SureRadius.all(SureRadius.xl),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x0D000000),
-                        offset: Offset(0, 5),
-                        blurRadius: 10,
-                      ),
-                      BoxShadow(
-                        color: Color(0x12000000),
-                        offset: Offset(0, 15),
-                        blurRadius: 25,
-                      ),
-                    ],
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: base,
+                    ),
                   ),
+                ),
+              ),
+              // What the glass bends: two soft glows and a faint coin.
+              Positioned(
+                left: -50,
+                top: -70,
+                child: _Glow(color: palette.glowA, size: 200),
+              ),
+              Positioned(
+                right: -40,
+                bottom: -80,
+                child: _Glow(color: palette.glowB, size: 220),
+              ),
+              Positioned(
+                right: -26,
+                top: -30,
+                child: Opacity(
+                  opacity: 0.18,
+                  child: SvgPicture.asset(
+                    coin,
+                    width: 140,
+                    height: 140,
+                    excludeFromSemantics: true,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: GlassSurface(
+                  borderRadius: SureRadius.all(SureRadius.xl),
+                  shadow: false,
+                  tint: white
+                      ? Colors.white.withValues(alpha: 0.14)
+                      : (darkTheme
+                            ? Colors.white.withValues(alpha: 0.07)
+                            : Colors.white.withValues(alpha: 0.42)),
+                  solidColor: white
+                      ? Colors.black.withValues(alpha: 0.25)
+                      : c.raised,
                   child: inner,
                 ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+}
+
+/// A soft round glow behind the tier glass.
+class _Glow extends StatelessWidget {
+  const _Glow({required this.color, required this.size});
+
+  final Color color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => SizedBox.square(
+    dimension: size,
+    child: DecoratedBox(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(colors: [color, color.withValues(alpha: 0)]),
+      ),
+    ),
+  );
 }
 
 class _RewardsBanner extends StatelessWidget {

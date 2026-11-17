@@ -6,6 +6,7 @@ import '../../../core/network/api_exception.dart';
 import '../../../core/network/interceptors.dart';
 import '../../../design_system/components/sheet_components.dart';
 import '../../../design_system/components/sure_button.dart';
+import '../../../design_system/components/sure_dialog.dart';
 import '../../../design_system/components/sure_text_field.dart';
 import '../../../design_system/components/sure_toast.dart';
 import '../../../design_system/theme/app_theme.dart';
@@ -155,7 +156,7 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
   Future<void> _delete(AddressDto a) async {
     final ok = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => SureDialog(
         title: const Text('Delete this address?'),
         content: Text(a.fullText),
         actions: [

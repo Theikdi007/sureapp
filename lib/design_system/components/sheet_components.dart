@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../glass/glass_surface.dart';
+import '../glass/liquid_glass.dart';
 import '../theme/app_theme.dart';
 import '../tokens/sure_metrics.dart';
 import '../tokens/sure_typography.dart';
@@ -347,6 +348,17 @@ class PillTabs extends StatelessWidget {
       );
     }
 
+    // iOS 26: the tabs sit in a glass capsule, like a segmented control.
+    Widget glass(Widget row) => LiquidGlassSwitch(
+      liquid: (_) => GlassSurface(
+        borderRadius: SureRadius.all(SureRadius.pill),
+        shadow: false,
+        padding: const EdgeInsets.all(4),
+        child: row,
+      ),
+      otherwise: (_) => row,
+    );
+
     if (!fullWidth) {
       // Prototype: start-aligned with the content edge, even when a parent
       // (a pinned header) centres its child.
@@ -354,13 +366,17 @@ class PillTabs extends StatelessWidget {
         alignment: AlignmentDirectional.centerStart,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: Row(spacing: 6, children: [for (final it in items) tab(it)]),
+          child: glass(
+            Row(spacing: 6, children: [for (final it in items) tab(it)]),
+          ),
         ),
       );
     }
-    return Row(
-      spacing: 6,
-      children: [for (final it in items) Expanded(child: tab(it))],
+    return glass(
+      Row(
+        spacing: 6,
+        children: [for (final it in items) Expanded(child: tab(it))],
+      ),
     );
   }
 }
