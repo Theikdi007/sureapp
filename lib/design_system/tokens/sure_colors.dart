@@ -62,6 +62,8 @@ class SureColors extends ThemeExtension<SureColors> {
     required this.hero,
     required this.onHeroFaded,
     required this.card,
+    required this.descriptionPanel,
+    required this.ratingBarTrack,
     required this.neutral,
     required this.boxBorder,
     required this.boxBorderFaded,
@@ -132,6 +134,15 @@ class SureColors extends ThemeExtension<SureColors> {
   /// 6 % white over the page in dark.
   final Color card;
 
+  /// "About this product" panel. Light: the prototype's `rgb(243,245,249)`.
+  /// The prototype keeps it light in dark mode too, which left its faded
+  /// text unreadable; dark uses a dark surface instead.
+  final Color descriptionPanel;
+
+  /// Rating bar track. Light: the prototype's `rgb(240,240,242)`; dark: a
+  /// dark track instead of the prototype's bright one.
+  final Color ratingBarTrack;
+
   /// `background-neutral`: switch track, sheet handle, stepper rail.
   final Color neutral;
 
@@ -150,12 +161,6 @@ class SureColors extends ThemeExtension<SureColors> {
 
   /// Ink on the white discs and pills over product photos (`rgb(20,22,27)`).
   static const literalInk = Color(0xFF14161B);
-
-  /// "About this product" panel (`rgb(243,245,249)`).
-  static const literalPanel = Color(0xFFF3F5F9);
-
-  /// Rating bar track (`rgb(240,240,242)`).
-  static const ratingTrack = Color(0xFFF0F0F2);
 
   /// Strikethrough compare price (`rgb(175,177,182)`).
   static const strikePrice = Color(0xFFAFB1B6);
@@ -209,6 +214,8 @@ class SureColors extends ThemeExtension<SureColors> {
     boxBorder: Color(0x1F000000),
     boxBorderFaded: Color(0x14000000),
     card: Color(0xFFFFFFFF),
+    descriptionPanel: Color(0xFFF3F5F9),
+    ratingBarTrack: Color(0xFFF0F0F2),
   );
 
   static const dark = SureColors(
@@ -265,6 +272,8 @@ class SureColors extends ThemeExtension<SureColors> {
     boxBorder: Color(0x1F000000),
     boxBorderFaded: Color(0x14000000),
     card: Color(0x0FFFFFFF),
+    descriptionPanel: Color(0xFF262930),
+    ratingBarTrack: Color(0xFF30343C),
   );
 
   @override
@@ -319,6 +328,8 @@ class SureColors extends ThemeExtension<SureColors> {
       hero: l(hero, other.hero),
       onHeroFaded: l(onHeroFaded, other.onHeroFaded),
       card: l(card, other.card),
+      descriptionPanel: l(descriptionPanel, other.descriptionPanel),
+      ratingBarTrack: l(ratingBarTrack, other.ratingBarTrack),
       neutral: l(neutral, other.neutral),
       boxBorder: l(boxBorder, other.boxBorder),
       boxBorderFaded: l(boxBorderFaded, other.boxBorderFaded),

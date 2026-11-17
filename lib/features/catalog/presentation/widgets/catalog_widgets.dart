@@ -11,6 +11,7 @@ import '../../../../design_system/adaptive/window_class.dart';
 import '../../../../design_system/components/item_card.dart';
 import '../../../../design_system/components/section_header.dart';
 import '../../../../design_system/components/sure_toast.dart';
+import '../../../../design_system/components/word_fit_text.dart';
 import '../../../../design_system/theme/app_theme.dart';
 import '../../../../design_system/tokens/sure_colors.dart';
 import '../../../../design_system/tokens/sure_metrics.dart';
@@ -580,7 +581,7 @@ class RatingSummaryView extends StatelessWidget {
                         child: LinearProgressIndicator(
                           value: (buckets[s]?.percent ?? 0) / 100,
                           minHeight: 6,
-                          backgroundColor: SureColors.ratingTrack,
+                          backgroundColor: context.colors.ratingBarTrack,
                           color: StarRow.amber,
                         ),
                       ),
@@ -589,8 +590,11 @@ class RatingSummaryView extends StatelessWidget {
                       const SizedBox(width: 8),
                       SizedBox(
                         width: 28,
-                        child: Text(
+                        // "100%" stays on one line (it wrapped to "100" /
+                        // "%" in the 28 pt column).
+                        child: WordFitText(
                           '${(buckets[s]?.percent ?? 0).round()}%',
+                          maxLines: 1,
                           textAlign: TextAlign.right,
                           style: _small(c.inkFaded),
                         ),

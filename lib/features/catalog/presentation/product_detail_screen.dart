@@ -199,7 +199,7 @@ class _ProductViewState extends ConsumerState<_ProductView> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: SureColors.literalPanel,
+                  color: c.descriptionPanel,
                   borderRadius: SureRadius.all(SureRadius.large),
                 ),
                 child: Text(
