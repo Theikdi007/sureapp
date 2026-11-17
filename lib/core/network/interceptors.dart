@@ -80,7 +80,8 @@ class AuthInterceptor extends QueuedInterceptor {
   final Dio plainDio;
   final TokenStorage tokens;
 
-  /// Called when refresh fails: send the user to sign-in.
+  /// Called when the server rejects the refresh token: send the user to
+  /// sign-in.
   final FutureOr<void> Function() onSessionEnded;
 
   Future<AuthTokens?>? _refreshing;
@@ -160,9 +161,15 @@ class AuthInterceptor extends QueuedInterceptor {
       );
       await tokens.save(next);
       return next;
-    } on DioException {
-      await tokens.clear();
-      await onSessionEnded();
+    } on DioException catch (e) {
+      // Only the server turning the refresh token down ends the session.
+      // Offline, a timeout or a 5xx keeps the member signed in: this request
+      // fails, and the next one refreshes again.
+      final status = e.response?.statusCode;
+      if (status != null && status >= 400 && status < 500) {
+        await tokens.clear();
+        await onSessionEnded();
+      }
       return null;
     }
   }
