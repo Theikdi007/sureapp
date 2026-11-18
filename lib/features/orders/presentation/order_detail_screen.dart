@@ -100,9 +100,16 @@ Widget _column(List<Widget> children) => SliverPadding(
 /// Prototype `OrderDetailScreen`. `GET orders/{number}`,
 /// `POST orders/{number}/feedback`.
 class OrderDetailScreen extends ConsumerStatefulWidget {
-  const OrderDetailScreen({super.key, required this.number});
+  const OrderDetailScreen({
+    super.key,
+    required this.number,
+    this.embedded = false,
+  });
 
   final String number;
+
+  /// Shown in the Orders detail pane: no back button.
+  final bool embedded;
 
   @override
   ConsumerState<OrderDetailScreen> createState() => _OrderDetailScreenState();
@@ -118,6 +125,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
     final o = v.value;
     return PageScaffold(
       title: 'Order Detail',
+      showBack: !widget.embedded,
       headerGap: 18,
       subtitle: '#${widget.number}',
       actions: [

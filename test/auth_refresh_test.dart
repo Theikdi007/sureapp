@@ -88,4 +88,80 @@ void main() {
     expect(ended, 1);
     expect(await tokens.read(), isNull);
   });
+
+  String jwt(DateTime exp) {
+    String part(Map<String, Object> m) =>
+        base64Url.encode(utf8.encode(jsonEncode(m))).replaceAll('=', '');
+    return '${part({'alg': 'HS256'})}.'
+        '${part({'exp': exp.millisecondsSinceEpoch ~/ 1000})}.sig';
+  }
+
+  test('reads the JWT expiry', () {
+    final now = DateTime.utc(2026, 11, 17, 12);
+    expect(
+      accessTokenExpired(jwt(now.add(const Duration(minutes: 10))), now: now),
+      isFalse,
+    );
+    expect(
+      accessTokenExpired(jwt(now.add(const Duration(seconds: 10))), now: now),
+      isTrue,
+    );
+    expect(accessTokenExpired('not-a-jwt', now: now), isFalse);
+  });
+
+  test('an expired access token is refreshed before the request', () async {
+    final expired = jwt(
+      DateTime.now().toUtc().subtract(const Duration(minutes: 1)),
+    );
+    FlutterSecureStorage.setMockInitialValues({
+      'auth.access_token': expired,
+      'auth.refresh_token': 'old-refresh',
+    });
+    final tokens = TokenStorage();
+    final sent = <String?>[];
+    final adapter = _Recorder(sent);
+    final base = BaseOptions(baseUrl: 'https://example.test/');
+    final plain = Dio(base)..httpClientAdapter = adapter;
+    final dio = Dio(base)
+      ..httpClientAdapter = adapter
+      ..interceptors.add(
+        AuthInterceptor(plainDio: plain, tokens: tokens, onSessionEnded: () {}),
+      );
+    await dio.get<void>('home');
+    // The refresh went first; home went out with the new token.
+    expect(sent, ['auth/refresh', 'home Bearer new-access']);
+  });
+}
+
+/// Records each request; answers refresh with a new pair and others 200.
+class _Recorder implements HttpClientAdapter {
+  _Recorder(this.sent);
+
+  final List<String?> sent;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    if (options.path.endsWith('auth/refresh')) {
+      sent.add('auth/refresh');
+      return ResponseBody.fromString(
+        jsonEncode({
+          'accessToken': 'new-access',
+          'refreshToken': 'new-refresh',
+        }),
+        200,
+        headers: {
+          Headers.contentTypeHeader: ['application/json'],
+        },
+      );
+    }
+    sent.add('${options.path} ${options.headers['Authorization']}');
+    return ResponseBody.fromString('{}', 200);
+  }
+
+  @override
+  void close({bool force = false}) {}
 }

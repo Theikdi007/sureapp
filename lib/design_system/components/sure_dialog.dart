@@ -49,9 +49,8 @@ class SureDialog extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: DefaultTextStyle.merge(
-                    style: SureText.body1(
-                      SureTypography.bold,
-                    ).copyWith(color: c.ink),
+                    style: SureText.body1(SureTypography.bold)
+                        .copyWith(color: c.ink),
                     child: title,
                   ),
                 ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -14,6 +15,7 @@ import '../../../design_system/components/page_scaffold.dart';
 import '../../../design_system/components/section_header.dart';
 import '../../../design_system/components/sheet_components.dart';
 import '../../../design_system/components/sure_button.dart';
+import '../../../design_system/components/sure_dialog.dart';
 import '../../../design_system/components/sure_text_field.dart';
 import '../../../design_system/components/sure_toast.dart';
 import '../../../design_system/theme/app_theme.dart';
@@ -136,6 +138,36 @@ class _RewardDetailState extends ConsumerState<RewardDetailScreen> {
         builder: (_) => _ShopScanner(rewardId: d.card.id),
       );
       if (shopCode == null || !mounted) return;
+    }
+
+    // Direct and code rewards have no step before the claim: confirm the
+    // points first (scan and delivery already ask for a store or address).
+    if (method == 'direct' || method == 'code') {
+      final balance = ref.read(loyaltySummaryProvider).value?.points;
+      final fmt = NumberFormat('#,##0');
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (context) => SureDialog(
+          title: Text('Use ${fmt.format(d.card.cost)} points?'),
+          content: Text(
+            balance == null
+                ? 'Claim ${d.card.title}.'
+                : 'Claim ${d.card.title}. You will have '
+                      '${fmt.format(balance - d.card.cost)} points left.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Claim'),
+            ),
+          ],
+        ),
+      );
+      if (ok != true || !mounted) return;
     }
 
     final action = '$method|$shopCode|$addressId';
@@ -746,8 +778,10 @@ class ClaimResultBody extends StatelessWidget {
           ),
         if (r.claimingId != null) ...[
           const SizedBox(height: 8),
+          // The server's claim id is a 32-character hex string: a short
+          // reference is enough for the counter.
           Text(
-            'Claim ${r.claimingId}',
+            'Ref. ${_shortRef(r.claimingId!)}',
             style: SureText.caption1(SureTypography.medium)
                 .copyWith(color: c.inkFaded),
           ),
@@ -886,4 +920,9 @@ class _DashedRRect extends CustomPainter {
 
   @override
   bool shouldRepaint(_DashedRRect old) => old.color != color;
+}
+
+String _shortRef(String id) {
+  final clean = id.replaceAll(RegExp('[^0-9A-Za-z]'), '').toUpperCase();
+  return clean.length <= 8 ? clean : clean.substring(0, 8);
 }

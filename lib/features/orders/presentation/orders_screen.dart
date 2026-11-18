@@ -20,6 +20,9 @@ import '../../../design_system/tokens/sure_metrics.dart';
 import '../../../design_system/tokens/sure_typography.dart';
 import '../data/order_dtos.dart';
 import '../data/orders_repository.dart';
+import '../../../design_system/adaptive/two_pane.dart';
+import '../../support/presentation/split_page.dart' show useSplitLayout;
+import 'order_detail_screen.dart' show OrderDetailScreen;
 
 part 'orders_screen.g.dart';
 
@@ -55,6 +58,10 @@ class OrdersScreen extends ConsumerStatefulWidget {
 class _OrdersScreenState extends ConsumerState<OrdersScreen> {
   String _tab = 'all';
 
+  /// The order open in the detail pane (wide screens only).
+  String? _selected;
+  bool _split = false;
+
   @override
   void initState() {
     super.initState();
@@ -83,7 +90,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
       (t) => t.name == _tab,
       orElse: () => OrderTab.all,
     );
-    return PageScaffold(
+    Widget page() => PageScaffold(
       title: 'Orders',
       headerGap: 16,
       showBack: false,
@@ -113,6 +120,36 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
           ..._orderSlivers(ref.watch(orderListProvider(orderTab)), orderTab),
       ],
     );
+    // Medium/expanded widths (and a book-posture fold): the order opens
+    // beside the list, as CLAUDE.md asks for list-detail screens.
+    return LayoutBuilder(
+      builder: (context, box) {
+        _split = useSplitLayout(context, box.maxWidth);
+        if (!_split) return page();
+        final selected = _selected;
+        return TwoPane(
+          list: page(),
+          detail: selected == null
+              ? null
+              : OrderDetailScreen(
+                  key: ValueKey(selected),
+                  number: selected,
+                  embedded: true,
+                ),
+          // Material: text styles (no debug underline) and the page fill.
+          emptyDetail: Material(
+            color: context.colors.page,
+            child: const Center(
+              child: EmptyState(
+                icon: LucideIcons.package,
+                title: 'Select an order',
+                description: 'Its details show here',
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   List<Widget> _orderSlivers(
@@ -131,7 +168,11 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
     (list) => SliverList.separated(
       itemCount: list.length,
       separatorBuilder: (_, _) => const SizedBox(height: 16),
-      itemBuilder: (context, i) => OrderListCard(order: list[i]),
+      itemBuilder: (context, i) => OrderListCard(
+        order: list[i],
+        selected: _split && list[i].number == _selected,
+        onTap: _split ? () => setState(() => _selected = list[i].number) : null,
+      ),
     ),
   );
 
@@ -276,9 +317,20 @@ String shortStatus(String label) => label.split(' — ').first;
 
 /// Design system `OrderListCard`.
 class OrderListCard extends StatelessWidget {
-  const OrderListCard({super.key, required this.order});
+  const OrderListCard({
+    super.key,
+    required this.order,
+    this.onTap,
+    this.selected = false,
+  });
 
   final OrderSummaryDto order;
+
+  /// Wide screens show the order beside the list instead of pushing it.
+  final VoidCallback? onTap;
+
+  /// Highlighted as the order open in the detail pane.
+  final bool selected;
 
   @override
   Widget build(BuildContext context) {
@@ -288,13 +340,15 @@ class OrderListCard extends StatelessWidget {
     return PressScale(
       scale: 0.98,
       semanticLabel: '${o.title}, ${o.statusLabel}, order ${o.number}',
-      onTap: () => context.push(AppRoutes.order(o.number)),
+      onTap: onTap ?? () => context.push(AppRoutes.order(o.number)),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: c.raised,
+          color: selected ? c.primaryFaded : c.raised,
           borderRadius: SureRadius.all(SureRadius.large),
-          border: Border.all(color: c.borderFaded),
+          border: Border.all(
+            color: selected ? c.primaryFadedBorder : c.borderFaded,
+          ),
         ),
         child: Row(
           children: [

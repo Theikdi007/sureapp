@@ -179,7 +179,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final router = GoRouter.of(context);
     final track = await showSureSheet<bool>(
       context,
-      builder: (context) => _OrderPlacedBody(order: o),
+      builder: (context) => _OrderPlacedBody(
+        order: o,
+        pickupStore: _mode == 'pickup'
+            ? _quote?.stores
+                  .where((s) => s.code == _storeCode)
+                  .firstOrNull
+                  ?.name
+            : null,
+      ),
     );
     if (!mounted) return;
     if (track == true) {
@@ -791,9 +799,12 @@ class _PlaceBar extends StatelessWidget {
 /// Design system `OrderConfirmBottomsheet`: green check, "Order Placed!",
 /// order number, breakdown, Track order.
 class _OrderPlacedBody extends StatelessWidget {
-  const _OrderPlacedBody({required this.order});
+  const _OrderPlacedBody({required this.order, this.pickupStore});
 
   final OrderPlacedDto order;
+
+  /// The store's name for a pickup order.
+  final String? pickupStore;
 
   @override
   Widget build(BuildContext context) {
@@ -832,7 +843,12 @@ class _OrderPlacedBody extends StatelessWidget {
           const SizedBox(height: 16),
           PayBreakdown(
             rows: [
-              ('Delivery', order.deliveryText, false),
+              // A pickup order names its store; "Delivery" read wrong.
+              if (pickupStore != null) ...[
+                ('Pick up at', pickupStore!, false),
+                ('When', order.deliveryText, false),
+              ] else
+                ('Delivery', order.deliveryText, false),
               ('Payment', order.paymentText, false),
               if (order.estimatedPoints > 0)
                 ('Points earned', '+$pts pts', true),

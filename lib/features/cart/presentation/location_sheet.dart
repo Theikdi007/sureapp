@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/core_providers.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../design_system/components/page_scaffold.dart';
 import '../../../design_system/components/section_header.dart';
@@ -20,22 +21,40 @@ part 'location_sheet.g.dart';
 
 /// The address the member picked in "Choose your location" (Home header or
 /// checkout). Null means the API's default (`home.deliverTo`, the quote's
-/// address). Cleared when another member signs in.
+/// address). Kept across launches; an address that is gone, or belongs to
+/// another member, falls back to the default.
 @Riverpod(keepAlive: true)
 class DeliveryAddress extends _$DeliveryAddress {
   @override
   AddressDto? build() {
     ref.watch(currentMemberIdProvider);
+    Future.microtask(_restore);
     return null;
   }
 
-  void choose(AddressDto address) => state = address;
+  Future<void> _restore() async {
+    final id = await ref.read(appPrefsProvider).deliveryAddressId();
+    if (id == null || !ref.mounted || state != null) return;
+    try {
+      final saved = await ref.read(savedAddressesProvider.future);
+      if (!ref.mounted || state != null) return;
+      state = saved.where((a) => a.id == id).firstOrNull;
+    } on Object {
+      // Signed out or offline: the API's default address shows.
+    }
+  }
+
+  void choose(AddressDto address) {
+    state = address;
+    ref.read(appPrefsProvider).setDeliveryAddressId(address.id);
+  }
 
   /// After an address is edited or deleted elsewhere.
   void sync(List<AddressDto> saved) {
     final current = state;
     if (current == null) return;
     state = saved.where((a) => a.id == current.id).firstOrNull;
+    if (state == null) ref.read(appPrefsProvider).setDeliveryAddressId(null);
   }
 }
 

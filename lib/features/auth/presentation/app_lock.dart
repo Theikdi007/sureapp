@@ -87,7 +87,8 @@ enum AppLockChange { done, unavailable, cancelled }
 /// turned off when the member signs out.
 @Riverpod(keepAlive: true)
 class AppLock extends _$AppLock {
-  static const relockAfter = Duration(minutes: 2);
+  /// QA spec (AU-12): back from 1+ minute in the background asks again.
+  static const relockAfter = Duration(minutes: 1);
 
   DateTime? _backgroundedAt;
   bool _authenticating = false;

@@ -18,6 +18,7 @@ import '../../../design_system/components/sure_image.dart';
 import '../../../design_system/components/sure_toast.dart';
 import '../../../design_system/components/word_fit_text.dart';
 import '../../../design_system/glass/glass_surface.dart';
+import '../../../design_system/glass/liquid_glass.dart';
 import '../../../design_system/theme/app_theme.dart';
 import '../../../design_system/tokens/sure_colors.dart';
 import '../../../design_system/tokens/sure_metrics.dart';
@@ -308,6 +309,25 @@ class _ProductViewState extends ConsumerState<_ProductView> {
                   SliverToBoxAdapter(child: SizedBox(height: 100 + bottom)),
                 ],
               ),
+              // Past the photo, cover the status bar so the clock never sits
+              // on scrolled text (glass on iOS 26).
+              if (!_overPhoto)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: top,
+                  child: IgnorePointer(
+                    child: LiquidGlassSwitch(
+                      liquid: (_) => const GlassSurface(
+                        borderRadius: BorderRadius.zero,
+                        shadow: false,
+                        child: SizedBox.expand(),
+                      ),
+                      otherwise: (_) => ColoredBox(color: c.page),
+                    ),
+                  ),
+                ),
               _TopButtons(product: _asCard, shareUrl: p.shareUrl),
               Positioned(
                 left: 0,

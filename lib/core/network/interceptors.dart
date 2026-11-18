@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:uuid/uuid.dart';
@@ -92,7 +93,15 @@ class AuthInterceptor extends QueuedInterceptor {
     RequestInterceptorHandler handler,
   ) async {
     if (options.extra[RequestFlags.skipAuth] != true) {
-      final current = await tokens.read();
+      var current = await tokens.read();
+      // Refresh before sending when the access token has (nearly) expired:
+      // `GET home` answers an expired token with 200 guest data instead of
+      // a 401, so waiting for the 401 showed a guest Home.
+      if (current != null && accessTokenExpired(current.accessToken)) {
+        current = await (_refreshing ??= _refresh().whenComplete(
+          () => _refreshing = null,
+        ));
+      }
       if (current != null) {
         options.headers['Authorization'] = 'Bearer ${current.accessToken}';
       }
@@ -189,5 +198,30 @@ Future<T> apiCall<T>(Future<T> Function() call) async {
     return await call();
   } on DioException catch (e) {
     throw ApiException.fromDio(e);
+  }
+}
+
+/// Whether a JWT access token expires within [margin]. False when its `exp`
+/// can't be read, so such a token is sent and a 401 still refreshes it.
+bool accessTokenExpired(
+  String token, {
+  Duration margin = const Duration(seconds: 30),
+  DateTime? now,
+}) {
+  final parts = token.split('.');
+  if (parts.length != 3) return false;
+  try {
+    final payload = jsonDecode(
+      utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))),
+    );
+    final exp = payload is Map ? payload['exp'] : null;
+    if (exp is! num) return false;
+    final expiry = DateTime.fromMillisecondsSinceEpoch(
+      exp.toInt() * 1000,
+      isUtc: true,
+    );
+    return !(now ?? DateTime.now().toUtc()).add(margin).isBefore(expiry);
+  } on Object {
+    return false;
   }
 }

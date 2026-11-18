@@ -397,7 +397,20 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
           products,
           () => ref.invalidate(productSearchProvider(_query)),
           (s) => [
-            if (s.items.isEmpty)
+            // A search or filter with no hits is "no matches", not an
+            // empty store.
+            if (s.items.isEmpty &&
+                ((_query.q ?? '').isNotEmpty ||
+                    _query !=
+                        ProductQuery(vendor: widget.vendorId, q: _query.q)))
+              const SliverToBoxAdapter(
+                child: EmptyState(
+                  icon: LucideIcons.searchX,
+                  title: 'No matches',
+                  description: 'Try a different search or clear the filters',
+                ),
+              )
+            else if (s.items.isEmpty)
               const SliverToBoxAdapter(
                 child: EmptyState(
                   icon: LucideIcons.store,
